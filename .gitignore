@@ -1,0 +1,49 @@
+# Default ignored files
+/shelf/
+/.idea/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+# Gradle
+.gradle/
+build/
+!build.gradle
+!settings.gradle
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# Eclipse project files
+.project
+.classpath
+.settings/
+
+# IntelliJ IDEA project files
+.idea/
+*.iml
+*.iws
+
+# NetBeans project files
+nbproject/
+
+# Maven wrapper files
+.mvn/
+target/
+
+# Logs
+*.log
+
+# OS generated files - if you use MacOS
+.DS_Store
+Thumbs.db
+
+# Gradle cache
+.gradle/
+
+# Dependency directories
+/.m2/
+/node_modules/
+
+# Spring Boot specific
+spring-boot-devtools.properties
