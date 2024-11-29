@@ -1,5 +1,6 @@
 package tnews.controllers;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import tnews.dto.UserCreateDTO;
@@ -23,22 +24,22 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public UserResponseDTO getUserById(@PathVariable Long id) {
+    public UserResponseDTO getUserById(@PathVariable("id") Long id) {
         return UserMapper.toDTO(userService.findById(id));
     }
 
     @PostMapping
-    public UserResponseDTO createUser (@RequestBody UserCreateDTO userCreateDTO) {
+    public UserResponseDTO createUser (@RequestBody @Valid UserCreateDTO userCreateDTO) {
         return UserMapper.toDTO(userService.create(UserMapper.fromDTO(userCreateDTO)));
     }
 
     @PostMapping("/{id}")
-    public UserResponseDTO updateUser(@PathVariable Long id, @RequestBody UserCreateDTO userCreateDTO) {
+    public UserResponseDTO updateUser(@PathVariable("id") Long id, @RequestBody @Valid UserCreateDTO userCreateDTO) {
         return UserMapper.toDTO(userService.update(id, UserMapper.fromDTO(userCreateDTO)));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id) {
+    public void deleteUser(@PathVariable("id") Long id) {
         userService.delete(id);
     }
 
