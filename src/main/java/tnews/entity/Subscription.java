@@ -1,5 +1,6 @@
 package tnews.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,6 +29,7 @@ public class Subscription {
     private Set<KeyWord> keyWords;
 
     @OneToOne
+    @JsonBackReference
     private User owner;
 
     private LocalDateTime timeInterval;
