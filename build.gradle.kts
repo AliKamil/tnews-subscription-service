@@ -15,6 +15,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.projectlombok/lombok
     compileOnly("org.projectlombok:lombok:1.18.36")
+    annotationProcessor("org.projectlombok:lombok:1.18.36")
 
     // https://mvnrepository.com/artifact/org.telegram/telegrambots
     implementation("org.telegram:telegrambots:6.9.7.1")
@@ -32,12 +33,23 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter:3.3.5")
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa
     implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.3.5")
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web
+    implementation("org.springframework.boot:spring-boot-starter-web:3.3.5")
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test
+    testImplementation("org.springframework.boot:spring-boot-starter-test:3.3.5")
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation
+    implementation("org.springframework.boot:spring-boot-starter-validation:3.3.5")
+
+
+    // https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core
+    implementation("org.hibernate.orm:hibernate-core:6.6.3.Final")
+
 
     // https://mvnrepository.com/artifact/org.postgresql/postgresql
     implementation("org.postgresql:postgresql:42.7.4")
 
     // https://mvnrepository.com/artifact/jakarta.persistence/jakarta.persistence-api
-    implementation("jakarta.persistence:jakarta.persistence-api:3.2.0")
+    implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
 
 
 

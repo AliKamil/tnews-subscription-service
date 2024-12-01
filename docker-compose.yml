@@ -1,0 +1,11 @@
+version: '2'
+services:
+  postgres-db:
+    image: postgres
+    container_name: tnews-db
+    environment:
+      POSTGRES_DB: tnews_DB
+      POSTGRES_USER: tnews_DB
+      POSTGRES_PASSWORD: postgres_tnews_DB
+    ports:
+      - "5555:5432"
