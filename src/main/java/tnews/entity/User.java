@@ -20,7 +20,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String username;
-    @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
     @JsonManagedReference
     private Subscription subscription;
     @CreationTimestamp
