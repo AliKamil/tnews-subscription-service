@@ -8,7 +8,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @SpringBootApplication
 @EnableJpaRepositories
 public class Application {
-    public static void main(String[] args) throws TelegramApiException {
+    public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
         }
 }
