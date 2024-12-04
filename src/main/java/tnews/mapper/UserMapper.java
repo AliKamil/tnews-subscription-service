@@ -23,14 +23,16 @@ public class UserMapper {
         User user = new User();
         user.setUsername(responseDTO.getUsername());
         user.setId(responseDTO.getId());
-        user.setSubscription(responseDTO.getSubscription());
+        Subscription newsSubscription = new Subscription();
+        newsSubscription.setId(responseDTO.getId());
+        user.setSubscription(newsSubscription);
         return user;
     }
     public static UserResponseDTO toDTO(User user) {
         UserResponseDTO userDTO = new UserResponseDTO();
         userDTO.setUsername(user.getUsername());
         userDTO.setId(user.getId());
-        userDTO.setSubscription(user.getSubscription());
+        userDTO.setSubscriptionId(user.getSubscription().getId());
         return userDTO;
     }
 
