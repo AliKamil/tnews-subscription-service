@@ -51,9 +51,8 @@ dependencies {
     // https://mvnrepository.com/artifact/jakarta.persistence/jakarta.persistence-api
     implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
 
-
-
-
+    // https://mvnrepository.com/artifact/org.telegram/telegrambots-spring-boot-starter
+    implementation("org.telegram:telegrambots-spring-boot-starter:6.9.7.1")
 }
 
 tasks.test {
