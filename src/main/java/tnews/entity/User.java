@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @Entity(name = "user_account")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String username;
     @OneToOne(cascade = CascadeType.ALL)
