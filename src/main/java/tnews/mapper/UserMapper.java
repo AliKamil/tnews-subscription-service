@@ -1,5 +1,6 @@
 package tnews.mapper;
 
+import org.telegram.telegrambots.meta.api.objects.Update;
 import tnews.dto.UserCreateDTO;
 import tnews.dto.UserResponseDTO;
 import tnews.entity.Subscription;
@@ -34,6 +35,12 @@ public class UserMapper {
         userDTO.setId(user.getId());
         userDTO.setSubscriptionId(user.getSubscription().getId());
         return userDTO;
+    }
+    public static User toEntity(Update update) {
+        User user = new User();
+        user.setId(update.getMessage().getFrom().getId());
+        user.setUsername(update.getMessage().getFrom().getFirstName());
+        return user;
     }
 
 }
