@@ -1,17 +1,17 @@
 package tnews.bot;
 
-public enum Command {
-    START("/start");
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
+@AllArgsConstructor
+public enum Command {
+    START("/start"),
+    TEST("/test"),
+    CATEGORY("/category"),
+    KEYWORD("/keyWord");
 
     private final String com;
 
-    Command(String com) {
-        this.com = com;
-    }
-
-    public String getCom() {
-        return com;
-    }
 
 }
