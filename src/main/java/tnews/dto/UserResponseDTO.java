@@ -11,5 +11,5 @@ import tnews.entity.Subscription;
 public class UserResponseDTO {
     private Long id;
     private String username;
-    private Subscription subscription;
+    private Long subscriptionId;
 }

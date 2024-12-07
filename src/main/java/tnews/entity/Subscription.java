@@ -28,9 +28,9 @@ public class Subscription {
     )
     private Set<KeyWord> keyWords;
 
-    @OneToOne
-    @JsonBackReference
-    private User owner;
+//    @OneToOne(mappedBy = "owner")
+//    @JsonBackReference
+//    private User owner;
 
     private LocalDateTime timeInterval;
 
