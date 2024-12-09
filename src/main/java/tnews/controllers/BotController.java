@@ -5,17 +5,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import tnews.bot.KeyboardFactory;
+import tnews.entity.Category1;
 import tnews.mapper.UserMapper;
 import tnews.service.CommandService;
 import tnews.service.UserService;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 public class BotController extends TelegramLongPollingBot {
-    private final UserService userService;
+
     private final CommandService commandService;
 
     @Value("${bot.name}")
@@ -27,17 +32,23 @@ public class BotController extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
-            Message message = update.getMessage();
-            Long chatId = message.getChatId();
-            String firstName = message.getFrom().getFirstName();
-            String text = message.getText();
-
-            userService.create(UserMapper.toEntity(update));
-
-            try {
-                this.execute(commandService.get(chatId, firstName, text));
-            } catch (TelegramApiException e) {
-                throw new RuntimeException(e);
+            List<BotApiMethod<?>> responses = commandService.get(update);
+            for (BotApiMethod<?> response : responses) {
+                try {
+                    execute(response);
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                }
+            }
+        } else if (update.hasCallbackQuery()) {
+            BotApiMethod<?> response = commandService.handleCallbackQuery(update);
+            if (response != null) {
+                try {
+                    System.out.println("::::....Response:....:::: " + response.toString());
+                    execute(response);
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
