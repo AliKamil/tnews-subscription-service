@@ -27,4 +27,6 @@ public class User {
     private LocalDateTime createdTime;
     @UpdateTimestamp
     private LocalDateTime updatedTime;
+
+    private UserAction currentAction;
 }

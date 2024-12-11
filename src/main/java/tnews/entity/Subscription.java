@@ -47,4 +47,5 @@ public class Subscription {
 
     @UpdateTimestamp
     private LocalDateTime updatedTime;
+
 }

@@ -2,18 +2,12 @@ package tnews.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import tnews.bot.KeyboardFactory;
-import tnews.entity.Category1;
-import tnews.mapper.UserMapper;
 import tnews.service.CommandService;
-import tnews.service.UserService;
 
 import java.util.List;
 
