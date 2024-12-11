@@ -7,30 +7,29 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import tnews.bot.Command;
 import tnews.bot.KeyboardFactory;
-import tnews.entity.Category1;
-import tnews.entity.Subscription;
-import tnews.entity.User;
-import tnews.mapper.UserMapper;
+import tnews.entity.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Component
 @AllArgsConstructor
 public class CommandService {
     private final UserService userService;
+    private final KeyWordsService keyWordsService;
+    private final SubscriptionService subscriptionService;
 
     public List<BotApiMethod<?>> get(Update update) {
         Message message = update.getMessage();
         Long chatId = message.getChatId();
+        String text = message.getText();
 
         if(message.isCommand()) {
             String firstName = message.getFrom().getFirstName();
-            String command = message.getText();
 
-            if (Command.START.getCom().equals(command)) {
+            if (Command.START.getCom().equals(text)) {
                 User user = new User();
                 user.setId(chatId);
                 user.setUsername(firstName);
@@ -47,6 +46,34 @@ public class CommandService {
                 return List.of(firstMessage, secondMessage);
             }
         }   //TODO: пока обрабатывает только /start. Тут должно быть управление подпиской
+
+        User user = userService.findById(chatId);
+        if(UserAction.WAITING_FOR_KEYWORD.equals(user.getCurrentAction())) {
+            KeyWord keyWord = new KeyWord();
+            keyWord.setKeyword(text);
+            keyWordsService.saveKeyWord(keyWord);
+
+            Subscription subscription = user.getSubscription();
+            if (subscription == null) {
+                subscription = new Subscription();
+                subscription.setId(chatId);
+            }
+            if (subscription.getKeyWords() == null || subscription.getKeyWords().isEmpty()) {
+                subscription.setKeyWords(Set.of(keyWord));
+            } else subscription.getKeyWords().add(keyWord);
+
+            subscriptionService.save(subscription);
+
+            user.setSubscription(subscription);
+            user.setCurrentAction(UserAction.READY);
+            userService.create(user);
+
+            return List.of(SendMessage.builder()
+                    .chatId(chatId)
+                    .text("Key word: " + keyWord.getKeyword() + " added to subscription!")
+                    .build());
+        }
+
         return List.of(SendMessage.builder()
                 .chatId(chatId.toString())
                 .text("Неизвестная команда")
@@ -65,9 +92,10 @@ public class CommandService {
                     .replyMarkup(KeyboardFactory.categoriesButtons())
                     .build();
         } else if (Command.KEYWORD.getCom().equals(callbackData)) {
+            userService.updateCurrentAction(chatId, UserAction.WAITING_FOR_KEYWORD.name());
             return SendMessage.builder()
                     .chatId(chatId)
-                    .text("Some keywords choosing for you ! ! !")
+                    .text("Enter the keyword:")
                     .build();
         } else if (Category1.isEnum(callbackData)) {
             userService.addCategory(chatId, callbackData);

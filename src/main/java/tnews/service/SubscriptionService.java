@@ -30,4 +30,8 @@ public class SubscriptionService {
 //        subscription.setCategories(Set.of(categoryObj));
 //        subscriptionRepository.save(subscription);
 //    }
+
+    public Subscription save(Subscription subscription) {
+        return subscriptionRepository.save(subscription);
+    }
 }
