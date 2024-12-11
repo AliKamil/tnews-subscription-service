@@ -20,12 +20,13 @@ public class Subscription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.MERGE)
     @JoinTable(
             name = "subscription_keywords",
             joinColumns = @JoinColumn(name = "subscription_id"),
             inverseJoinColumns = @JoinColumn(name = "keyword_id")
     )
+//    @Transient
     private Set<KeyWord> keyWords;
 
 //    @OneToOne(mappedBy = "owner")
@@ -34,12 +35,13 @@ public class Subscription {
 
     private LocalDateTime timeInterval;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.MERGE)
     @JoinTable(
             name = "subscription_categories",
             joinColumns = @JoinColumn(name = "subscription_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
+//@Transient
     private Set<Category> categories;
 
     @CreationTimestamp
