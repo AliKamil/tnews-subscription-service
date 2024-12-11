@@ -34,6 +34,7 @@ dependencies {
     implementation("org.telegram:telegrambots-spring-boot-starter:6.9.7.1")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("com.h2database:h2")
 }
 
 tasks.withType<Test> {
