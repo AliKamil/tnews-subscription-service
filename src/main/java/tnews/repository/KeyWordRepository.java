@@ -6,4 +6,5 @@ import tnews.entity.KeyWord;
 
 @Repository
 public interface KeyWordRepository extends JpaRepository<KeyWord, Long> {
+    KeyWord findBykeyword(String keyword);
 }
