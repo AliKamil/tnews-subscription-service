@@ -21,9 +21,24 @@ public class KeyWordsService {
     }
 
     public KeyWord saveKeyWord(KeyWord keyWord) {
+        KeyWord find = findKeyWordByValue(keyWord.getKeyword());
+        if (find == null)
+            return keyWordRepository.save(keyWord);
+        return find;
+    }
+
+    public void deleteKeyWordById(Long id) {
+        keyWordRepository.deleteById(id);
+    }
+
+    public KeyWord updateKeyWord(Long id, KeyWord keyWord) {
+        keyWord.setId(id);
         return keyWordRepository.save(keyWord);
     }
 
+    public KeyWord findKeyWordByValue(String value) {
+        return keyWordRepository.findBykeyword(value);
+    }
 
 
 }

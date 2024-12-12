@@ -30,7 +30,8 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")// https://mvnrepository.com/artifact/org.telegram/telegrambots-spring-boot-starter
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // https://mvnrepository.com/artifact/org.telegram/telegrambots-spring-boot-starter
     implementation("org.telegram:telegrambots-spring-boot-starter:6.9.7.1")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
