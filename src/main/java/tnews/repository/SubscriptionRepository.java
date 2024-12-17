@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import tnews.entity.Subscription;
 
 @Repository
-public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
+public interface SubscriptionRepository extends JpaRepository<Subscription, Long>, CustomizedSave<Subscription> {
 }
