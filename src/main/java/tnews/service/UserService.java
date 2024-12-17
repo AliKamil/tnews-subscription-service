@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tnews.entity.Category;
 import tnews.entity.Subscription;
 import tnews.entity.User;
+import tnews.entity.UserAction;
 import tnews.repository.UserRepository;
 
 import java.util.List;
@@ -37,7 +38,6 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    @Transactional
     public void addCategory(Long id, String category) {
         Category categoryObj = new Category();
         categoryObj.setCategoryName(category);
@@ -47,6 +47,12 @@ public class UserService {
         User user = userRepository.findById(id).orElse(null);
         user.setSubscription(subscription);
         userRepository.save(user);
+    }
+
+    public User updateCurrentAction(Long id, String action) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User Not Found"));
+        user.setCurrentAction(UserAction.valueOf(action));
+        return userRepository.save(user);
     }
 
 }

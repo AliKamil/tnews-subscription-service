@@ -1,6 +1,7 @@
 package tnews.service;
 
 import lombok.AllArgsConstructor;
+import org.hibernate.Session;
 import org.springframework.stereotype.Service;
 import tnews.entity.Category;
 import tnews.entity.Subscription;
@@ -13,6 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class SubscriptionService {
     private SubscriptionRepository subscriptionRepository;
+    private CategoryService categoryService;
 
     public List<Subscription> findAll() {
         return subscriptionRepository.findAll();
@@ -30,4 +32,15 @@ public class SubscriptionService {
 //        subscription.setCategories(Set.of(categoryObj));
 //        subscriptionRepository.save(subscription);
 //    }
+
+    public Subscription save(Subscription subscription) {
+//        if (subscription.getCategories() != null) {
+//            for(Category category : subscription.getCategories()) {
+//                if (categoryService.findByCategoryName(category.getCategoryName()) != null) {
+//
+//                }
+//            }
+//        }
+        return subscriptionRepository.save(subscription);
+    }
 }
