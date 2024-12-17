@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -16,6 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@ToString
 public class Subscription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,5 +65,6 @@ public class Subscription {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 
 }
