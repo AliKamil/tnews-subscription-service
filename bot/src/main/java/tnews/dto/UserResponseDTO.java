@@ -3,7 +3,6 @@ package tnews.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tnews.entity.Subscription;
 
 @Data
 @AllArgsConstructor

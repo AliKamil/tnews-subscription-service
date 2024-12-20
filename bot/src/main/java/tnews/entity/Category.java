@@ -3,12 +3,10 @@ package tnews.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 import java.util.Set;
-import org.apache.commons.lang3.builder.HashCodeExclude;
 
 @Data
 @AllArgsConstructor

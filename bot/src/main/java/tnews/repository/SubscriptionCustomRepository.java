@@ -4,8 +4,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.stream.Collectors;
 import org.hibernate.Session;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import tnews.entity.Subscription;
 
 interface CustomizedSave<T> {

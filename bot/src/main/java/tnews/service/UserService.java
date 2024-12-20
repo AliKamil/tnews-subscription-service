@@ -2,7 +2,6 @@ package tnews.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import tnews.entity.Category;
 import tnews.entity.Subscription;
 import tnews.entity.User;
