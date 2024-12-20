@@ -1,0 +1,1 @@
+rootProject.name = "tnews-aggregation-client"

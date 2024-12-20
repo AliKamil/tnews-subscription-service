@@ -1,14 +1,11 @@
 package tnews.service;
 
 import lombok.AllArgsConstructor;
-import org.hibernate.Session;
 import org.springframework.stereotype.Service;
-import tnews.entity.Category;
 import tnews.entity.Subscription;
 import tnews.repository.SubscriptionRepository;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 @AllArgsConstructor
