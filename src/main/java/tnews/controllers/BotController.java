@@ -38,7 +38,7 @@ public class BotController extends TelegramLongPollingBot {
             BotApiMethod<?> response = commandService.handleCallbackQuery(update);
             if (response != null) {
                 try {
-                    System.out.println("::::....Response:....:::: " + response.toString());
+                    // System.out.println("::::....Response:....:::: " + response.toString());
                     execute(response);
                 } catch (TelegramApiException e) {
                     e.printStackTrace();
