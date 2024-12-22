@@ -1,9 +1,11 @@
 package tnews.service;
 
 import lombok.AllArgsConstructor;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.springframework.stereotype.Service;
 import tnews.entity.Category;
+import tnews.entity.KeyWord;
 import tnews.entity.Subscription;
 import tnews.repository.SubscriptionRepository;
 
@@ -24,23 +26,42 @@ public class SubscriptionService {
         return subscriptionRepository.findById(id).orElse(null);
     }
 
-//    public void addCategory(Long id, String category) {
-//        Category categoryObj = new Category();
-//        categoryObj.setCategoryName(category);
-//        Subscription subscription = new Subscription();
-//        subscription.setId(id);
-//        subscription.setCategories(Set.of(categoryObj));
-//        subscriptionRepository.save(subscription);
-//    }
-
-    public Subscription save(Subscription subscription) {
-//        if (subscription.getCategories() != null) {
-//            for(Category category : subscription.getCategories()) {
-//                if (categoryService.findByCategoryName(category.getCategoryName()) != null) {
-//
-//                }
-//            }
-//        }
+    public Subscription addCategory(Long id, Category category) {
+        Set<Category> categories;
+        Subscription subscription = findById(id);
+        if (subscription != null) {
+            categories = subscription.getCategories();
+            categories.add(category);
+        } else {
+            subscription = new Subscription();
+            categories = Set.of(category);
+        }
+        subscription.setCategories(categories);
         return subscriptionRepository.save(subscription);
     }
+
+    public Subscription addKeyWord(Long id, KeyWord keyword) {
+        Set<KeyWord> keyWords;
+        Subscription subscription = findById(id);
+        if (subscription != null) {
+            keyWords = subscription.getKeyWords();
+            keyWords.add(keyword);
+        } else {
+            subscription = new Subscription();
+            keyWords = Set.of(keyword);
+        }
+        subscription.setKeyWords(keyWords);
+        return subscriptionRepository.save(subscription);
+    }
+
+    public Subscription save(Subscription subscription) {
+        return subscriptionRepository.save(subscription);
+    }
+
+//    public Set<Category> getCategoriesBySubscriptionId(Long id) {
+//        Subscription subscription = findById(id);
+//        Hibernate.initialize(subscription.getCategories());
+//        return subscription.getCategories();
+//    }
+
 }
