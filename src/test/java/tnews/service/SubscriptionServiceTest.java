@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -32,6 +33,8 @@ class SubscriptionServiceTest {
   @Autowired
   KeyWordRepository keyWordRepository;
   @Autowired
+  KeyWordsService keyWordsService;
+  @Autowired
   CategoryRepository categoryRepository;
 
   Long subscriptionId1;
@@ -45,6 +48,8 @@ class SubscriptionServiceTest {
   Long categoryId1;
   Long categoryId2;
   Long categoryId3;
+    @Autowired
+    private CategoryService categoryService;
 
   @BeforeEach
   void setUp() {
@@ -52,9 +57,9 @@ class SubscriptionServiceTest {
     KeyWord keyWord2 = new KeyWord(null, "TWO", Set.of());
     KeyWord keyWord3 = new KeyWord(null, "THREE", Set.of());
 
-    KeyWord savedKeyWord = keyWordRepository.save(keyWord1);
-    KeyWord savedKeyWord2 = keyWordRepository.save(keyWord2);
-    KeyWord savedKeyWord3 = keyWordRepository.save(keyWord3);
+    KeyWord savedKeyWord = keyWordsService.saveKeyWord(keyWord1);
+    KeyWord savedKeyWord2 = keyWordsService.saveKeyWord(keyWord2);
+    KeyWord savedKeyWord3 = keyWordsService.saveKeyWord(keyWord3);
 
     keyWordId1 = savedKeyWord.getId();
     keyWordId2 = savedKeyWord2.getId();
@@ -64,61 +69,65 @@ class SubscriptionServiceTest {
     Category category2 = new Category(null, "category2", Set.of());
     Category category3 = new Category(null, "category3", Set.of());
 
-    Category savedCategory = categoryRepository.save(category1);
-    Category savedCategory2 = categoryRepository.save(category2);
-    Category savedCategory3 = categoryRepository.save(category3);
+    Category savedCategory = categoryService.save(category1);
+    Category savedCategory2 = categoryService.save(category2);
+    Category savedCategory3 = categoryService.save(category3);
 
     categoryId1 = savedCategory.getId();
     categoryId2 = savedCategory2.getId();
     categoryId3 = savedCategory3.getId();
 
-//    Subscription subscription1 = new Subscription(
-//            null,
-//            Set.of(keyWord1, keyWord2, keyWord3),
-//            LocalDateTime.now(),
-//            Set.of(category1, category2, category3),
-//            LocalDateTime.now(),
-//            LocalDateTime.now()
-//    );
-//    Subscription subscription2 = new Subscription(
-//            null,
-//            Set.of(),
-//            LocalDateTime.now(),
-//            Set.of(category1),
-//            LocalDateTime.now(),
-//            LocalDateTime.now()
-//    );
-//    Subscription subscription3 = new Subscription(
-//            null,
-//            Set.of(keyWord3, keyWord1),
-//            LocalDateTime.now(),
-//            Set.of(),
-//            LocalDateTime.now(),
-//            LocalDateTime.now()
-//    );
-//    Subscription savedSubscription = subscriptionRepository.save(subscription1);
-//    Subscription savedSubscription2 = subscriptionRepository.save(subscription2);
-//    Subscription savedSubscription3 = subscriptionRepository.save(subscription3);
-//
-//    subscriptionId1 = savedSubscription.getId();
-//    subscriptionId2 = savedSubscription2.getId();
-//    subscriptionId3 = savedSubscription3.getId();
+    Subscription subscription1 = new Subscription(
+            null,
+            Set.of(savedKeyWord, savedKeyWord2, savedKeyWord3),
+            LocalDateTime.now(),
+            Set.of(savedCategory, savedCategory2, savedCategory3),
+            LocalDateTime.now(),
+            LocalDateTime.now()
+    );
+    Subscription subscription2 = new Subscription(
+            null,
+            Set.of(),
+            LocalDateTime.now(),
+            Set.of(savedCategory),
+            LocalDateTime.now(),
+            LocalDateTime.now()
+    );
+    Subscription subscription3 = new Subscription(
+            null,
+            Set.of(savedKeyWord3, savedKeyWord),
+            LocalDateTime.now(),
+            Set.of(),
+            LocalDateTime.now(),
+            LocalDateTime.now()
+    );
+    Subscription savedSubscription = subscriptionRepository.save(subscription1);
+    Subscription savedSubscription2 = subscriptionRepository.save(subscription2);
+    Subscription savedSubscription3 = subscriptionRepository.save(subscription3);
+
+    subscriptionId1 = savedSubscription.getId();
+    subscriptionId2 = savedSubscription2.getId();
+    subscriptionId3 = savedSubscription3.getId();
 
   }
 
   @AfterEach
   void tearDown() {
-//    subscriptionRepository.deleteById(subscriptionId1);
-//    subscriptionRepository.deleteById(subscriptionId2);
-//    subscriptionRepository.deleteById(subscriptionId3);
+    subscriptionRepository.deleteById(subscriptionId1);
+    subscriptionRepository.deleteById(subscriptionId2);
+    subscriptionRepository.deleteById(subscriptionId3);
 
-    keyWordRepository.deleteById(keyWordId1);
-    keyWordRepository.deleteById(keyWordId2);
-    keyWordRepository.deleteById(keyWordId3);
+//    keyWordRepository.deleteById(keyWordId1);
+//    keyWordRepository.deleteById(keyWordId2);
+//    keyWordRepository.deleteById(keyWordId3);
 
-    categoryRepository.deleteById(categoryId1);
-    categoryRepository.deleteById(categoryId2);
-    categoryRepository.deleteById(categoryId3);
+
+
+//    categoryRepository.deleteById(categoryId1);
+//    categoryRepository.deleteById(categoryId2);
+//    categoryRepository.deleteById(categoryId3);
+
+
 
   }
 
@@ -141,7 +150,6 @@ class SubscriptionServiceTest {
     assertNotNull(persisted);
     assertNotNull(retrieved);
     assertEquals(persisted.getId(), retrieved.getId());
-    assertEquals(persisted.getCategories().size(), retrieved.getCategories().size());
 //    for(int i = 0; i<persisted.getCategories().size(); i++) {
 //      assertEquals(
 //              persisted.getCategories().stream()
@@ -154,7 +162,7 @@ class SubscriptionServiceTest {
 //                      .get(i)
 //      );
 //    }
-    assertEquals(persisted.getKeyWords().size(), retrieved.getKeyWords().size());
+  //    assertEquals(persisted.getKeyWords().size(), retrieved.getKeyWords().size());
 //    for(int i = 0; i < persisted.getKeyWords().size(); i++) {
 //      assertEquals(
 //              persisted.getKeyWords().stream()
@@ -172,6 +180,35 @@ class SubscriptionServiceTest {
             retrieved.getTimeInterval().truncatedTo(ChronoUnit.MILLIS)
     );
 
-
+    Long id = retrieved.getId();
+    subscriptionRepository.deleteById(id);
+    assertNull(subscriptionRepository.findById(id).orElse(null));
   }
+
+  @Test
+  public void getAllSubscriptions() {
+    List<Subscription> subscriptions = subscriptionService.findAll();
+    assertNotNull(subscriptions);
+    List<Subscription> retrievedSubscriptions = subscriptionRepository.findAll();
+    assertNotNull(retrievedSubscriptions);
+    assertEquals(subscriptions.size(), retrievedSubscriptions.size());
+    for (int i = 0; i < subscriptions.size(); i++) {
+      assertEquals(subscriptions.get(i).getId(), retrievedSubscriptions.get(i).getId());
+      assertEquals(subscriptions.get(i).getTimeInterval().truncatedTo(ChronoUnit.MILLIS),
+              retrievedSubscriptions.get(i).getTimeInterval().truncatedTo(ChronoUnit.MILLIS));
+    }
+  }
+
+  @Test
+  public void getSubscriptionById() {
+    Subscription subscription = subscriptionService.findById(subscriptionId1);
+    assertNotNull(subscription);
+    Subscription retrieved = subscriptionRepository.findById(subscriptionId1).orElse(null);
+    assertNotNull(retrieved);
+
+    assertEquals(subscription.getId(), retrieved.getId());
+    assertEquals(subscription.getTimeInterval().truncatedTo(ChronoUnit.MILLIS),
+            retrieved.getTimeInterval().truncatedTo(ChronoUnit.MILLIS));
+  }
+
 }

@@ -15,11 +15,25 @@ public class KeyboardFactory {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
         inlineKeyboardButtons.add(new InlineKeyboardButton().builder()
-                .text("CATEGORY")
+                .text("ПО КАТЕГОРИЯМ")
                 .callbackData(Command.CATEGORY.getCom())
                 .build());
         inlineKeyboardButtons.add(new InlineKeyboardButton().builder()
-                .text("KEYWORDS")
+                .text("ПО КЛЮЧЕВЫМ СЛОВАМ")
+                .callbackData(Command.KEYWORD.getCom())
+                .build());
+        rows.add(inlineKeyboardButtons);
+        inlineKeyboardMarkup.setKeyboard(rows);
+        return inlineKeyboardMarkup;
+    }
+
+    public static InlineKeyboardMarkup keyWordButton() {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<InlineKeyboardButton> inlineKeyboardButtons = new ArrayList<>();
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+
+        inlineKeyboardButtons.add(new InlineKeyboardButton().builder()
+                .text("добавить еще одно ключевое слово")
                 .callbackData(Command.KEYWORD.getCom())
                 .build());
         rows.add(inlineKeyboardButtons);
