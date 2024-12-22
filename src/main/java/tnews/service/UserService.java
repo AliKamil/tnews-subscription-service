@@ -3,10 +3,7 @@ package tnews.service;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tnews.entity.Category;
-import tnews.entity.Subscription;
-import tnews.entity.User;
-import tnews.entity.UserAction;
+import tnews.entity.*;
 import tnews.repository.UserRepository;
 
 import java.util.List;
@@ -16,6 +13,9 @@ import java.util.Set;
 @AllArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final CategoryService categoryService;
+    private final KeyWordsService keyWordsService;
+    private final SubscriptionService subscriptionService;
 
     public List<User> findAll() {
         return userRepository.findAll();
@@ -38,15 +38,31 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    public void addCategory(Long id, String category) {
+    public User addCategory(Long id, String category) {
         Category categoryObj = new Category();
         categoryObj.setCategoryName(category);
-        Subscription subscription = new Subscription();
-        subscription.setId(id);
-        subscription.setCategories(Set.of(categoryObj));
+        Category savedCategory = categoryService.save(categoryObj);
+        Subscription subscription = subscriptionService.addCategory(id, savedCategory);
         User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            return null;
+        }
         user.setSubscription(subscription);
-        userRepository.save(user);
+        return userRepository.save(user);
+    }
+
+    public User addKeyword(Long id, String keyword) {
+        KeyWord keyWordObj = new KeyWord();
+        keyWordObj.setKeyword(keyword);
+        KeyWord savedKeyWord = keyWordsService.saveKeyWord(keyWordObj);
+        Subscription subscription = subscriptionService.addKeyWord(id, savedKeyWord);
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            return null;
+        }
+        user.setSubscription(subscription);
+        user.setCurrentAction(UserAction.READY);
+        return userRepository.save(user);
     }
 
     public User updateCurrentAction(Long id, String action) {

@@ -21,8 +21,12 @@ class CustomizedSaveImpl implements CustomizedSave<Subscription> {
   @Override
   public Subscription save(Subscription entity) {
     Session session = entityManager.unwrap(Session.class);
-    entity.setCategories(entity.getCategories().stream().map(session::merge).collect(Collectors.toSet()));
-    entity.setKeyWords(entity.getKeyWords().stream().map(session::merge).collect(Collectors.toSet()));
+    if (entity.getCategories() != null) {
+        entity.setCategories(entity.getCategories().stream().map(session::merge).collect(Collectors.toSet()));
+    }
+    if (entity.getKeyWords() != null) {
+       entity.setKeyWords(entity.getKeyWords().stream().map(session::merge).collect(Collectors.toSet()));
+    }
     session.persist(entity);
     return session.merge(entity);
   }

@@ -40,7 +40,7 @@ public class CommandService {
                         .build();
                 SendMessage secondMessage = SendMessage.builder()
                         .chatId(chatId.toString())
-                        .text("Choose...")
+                        .text("Как будем искать навости? (можно выбрать и категории и ключевые слова)")
                         .replyMarkup(KeyboardFactory.startButtons())
                         .build();
                 return List.of(firstMessage, secondMessage);
@@ -49,28 +49,17 @@ public class CommandService {
 
         User user = userService.findById(chatId);
         if(UserAction.WAITING_FOR_KEYWORD.equals(user.getCurrentAction())) {
-            KeyWord keyWord = new KeyWord();
-            keyWord.setKeyword(text);
-            keyWordsService.saveKeyWord(keyWord);
-
-            Subscription subscription = user.getSubscription();
-            if (subscription == null) {
-                subscription = new Subscription();
-                subscription.setId(chatId);
+            User updateUser = userService.addKeyword(chatId, text);
+            if (updateUser == null) {
+                return List.of(SendMessage.builder()
+                        .chatId(chatId)
+                        .text("Пользователь не найден :(")
+                        .build());
             }
-            if (subscription.getKeyWords() == null || subscription.getKeyWords().isEmpty()) {
-                subscription.setKeyWords(Set.of(keyWord));
-            } else subscription.getKeyWords().add(keyWord);
-
-            subscriptionService.save(subscription);
-
-            user.setSubscription(subscription);
-            user.setCurrentAction(UserAction.READY);
-            userService.create(user);
-
             return List.of(SendMessage.builder()
                     .chatId(chatId)
-                    .text("Key word: " + keyWord.getKeyword() + " added to subscription!")
+                    .text("Ключевое слово: " + text + " добавлено!")
+                    .replyMarkup(KeyboardFactory.keyWordButton())
                     .build());
         }
 
@@ -88,27 +77,33 @@ public class CommandService {
         if (Command.CATEGORY.getCom().equals(callbackData)) {
             return SendMessage.builder()
                     .chatId(chatId.toString())
-                    .text("Choose you category:")
+                    .text("Выберите нужную категорию: ")
                     .replyMarkup(KeyboardFactory.categoriesButtons())
                     .build();
         } else if (Command.KEYWORD.getCom().equals(callbackData)) {
             userService.updateCurrentAction(chatId, UserAction.WAITING_FOR_KEYWORD.name());
             return SendMessage.builder()
                     .chatId(chatId)
-                    .text("Enter the keyword:")
+                    .text("Введите ключевое слово: ")
                     .build();
         } else if (Category1.isEnum(callbackData)) {
-            userService.addCategory(chatId, callbackData);
+            User updateUser = userService.addCategory(chatId, callbackData);
+            if (updateUser == null) {
+                return SendMessage.builder()
+                        .chatId(chatId)
+                        .text("Пользователь не найден :(")
+                        .build();
+            }
             return SendMessage.builder()
                     .chatId(chatId)
-                    .text("Category added :) You can choose more")
+                    .text("Категория добавлена. :) Можете выбрать еще несколько категорий")
                     .build();
             
         }
 
         return SendMessage.builder()
                 .chatId(chatId.toString())
-                .text("Error :(")
+                .text("Неизвестная команда")
                 .build();
     }
 
