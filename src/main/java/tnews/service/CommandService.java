@@ -7,8 +7,10 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import tnews.bot.Command;
 import tnews.bot.KeyboardFactory;
+import tnews.bot.Management;
 import tnews.entity.*;
 
 import java.util.List;
@@ -20,6 +22,21 @@ public class CommandService {
     private final UserService userService;
     private final KeyWordsService keyWordsService;
     private final SubscriptionService subscriptionService;
+
+    private SendMessage createMessage (Long id, String text) {
+        return SendMessage.builder()
+                .chatId(id)
+                .text(text)
+                .build();
+    }
+
+    private SendMessage createMessageWithReplyMarkup (Long id, String text, ReplyKeyboard replyMarkup) {
+        return SendMessage.builder()
+                .chatId(id)
+                .text(text)
+                .replyMarkup(replyMarkup)
+                .build();
+    }
 
     public List<BotApiMethod<?>> get(Update update) {
         Message message = update.getMessage();
@@ -34,39 +51,52 @@ public class CommandService {
                 user.setId(chatId);
                 user.setUsername(firstName);
                 userService.create(user);
-                SendMessage firstMessage = SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text("Привет, " + firstName + "! Я новостной бот. Рад тебя видеть!")
-                        .build();
-                SendMessage secondMessage = SendMessage.builder()
-                        .chatId(chatId.toString())
-                        .text("Как будем искать навости? (можно выбрать и категории и ключевые слова)")
-                        .replyMarkup(KeyboardFactory.startButtons())
-                        .build();
+                SendMessage firstMessage = createMessage(chatId,
+                        "Привет, " + firstName + "! Я новостной бот. Рад тебя видеть!");
+                SendMessage secondMessage = createMessageWithReplyMarkup(chatId,
+                        "Как будем искать новости? (можно выбрать и категории и ключевые слова)",
+                        KeyboardFactory.startButtons());
                 return List.of(firstMessage, secondMessage);
             }
-        }   //TODO: пока обрабатывает только /start. Тут должно быть управление подпиской
+            if (Command.UPDATE_CATEGORY.getCom().equals(text)) {
+                Subscription subscription = subscriptionService.findById(chatId);
+                Set<Category> categories = subscription.getCategories();
+            }
+        }   //TODO: пока обрабатывает только /start. Тут должно быть управление подпиской. Стоит заменить на switch?!
 
         User user = userService.findById(chatId);
         if(UserAction.WAITING_FOR_KEYWORD.equals(user.getCurrentAction())) {
             User updateUser = userService.addKeyword(chatId, text);
             if (updateUser == null) {
-                return List.of(SendMessage.builder()
-                        .chatId(chatId)
-                        .text("Пользователь не найден :(")
-                        .build());
+                return List.of(createMessage(chatId, "Пользователь не найден :("));
             }
-            return List.of(SendMessage.builder()
-                    .chatId(chatId)
-                    .text("Ключевое слово: " + text + " добавлено!")
-                    .replyMarkup(KeyboardFactory.keyWordButton())
-                    .build());
+            return List.of(createMessageWithReplyMarkup(chatId, "Ключевое слово: " + text + " добавлено!",
+                            KeyboardFactory.settingMenu()));
+        }
+        if (Management.ADD.getValue().equals(text)) {
+            if (user.getSubscription() != null) {
+                return List.of(createMessageWithReplyMarkup(chatId, "Подписка уже создана",
+                                KeyboardFactory.updateButtonsCategoryAndKeyword()));
+            }
+            return List.of( createMessage(chatId, "Введите: " + Command.START.getCom()));
         }
 
-        return List.of(SendMessage.builder()
-                .chatId(chatId.toString())
-                .text("Неизвестная команда")
-                .build());
+        if (Management.UPDATE.getValue().equals(text)) {
+            if (user.getSubscription() == null) {
+                return List.of(
+                        createMessage(chatId, "Для начала необходимо создать подписку"),
+                        createMessage(chatId, "Введите: " + Command.START.getCom()));
+            }
+            return List.of(
+                    createMessageWithReplyMarkup(chatId, "Что обновить?",
+                            KeyboardFactory.updateButtonsCategoryAndKeyword()));
+        }
+        if (Management.DELETE.getValue().equals(text)) {
+            //TODO: нужно реализовать!!! может заменить на switch? (Management)
+        }
+
+        return List.of(createMessageWithReplyMarkup(chatId, "Неизвестная команда",
+                        KeyboardFactory.keyboardMarkup(user.getSubscription())));
     }
 
     public BotApiMethod<?> handleCallbackQuery (Update update) {
@@ -84,7 +114,7 @@ public class CommandService {
             userService.updateCurrentAction(chatId, UserAction.WAITING_FOR_KEYWORD.name());
             return SendMessage.builder()
                     .chatId(chatId)
-                    .text("Введите ключевое слово: ")
+                    .text("Введите одно ключевое слово: ")
                     .build();
         } else if (Category1.isEnum(callbackData)) {
             User updateUser = userService.addCategory(chatId, callbackData);
@@ -96,7 +126,8 @@ public class CommandService {
             }
             return SendMessage.builder()
                     .chatId(chatId)
-                    .text("Категория добавлена. :) Можете выбрать еще несколько категорий")
+                    .text("Категория добавлена")
+                    .replyMarkup(KeyboardFactory.settingMenu())
                     .build();
             
         }

@@ -20,10 +20,9 @@ import java.util.Set;
 @ToString
 public class Subscription {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(
             name = "subscription_keywords",
             joinColumns = @JoinColumn(name = "subscription_id"),
@@ -38,7 +37,7 @@ public class Subscription {
 
     private LocalDateTime timeInterval;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(
             name = "subscription_categories",
             joinColumns = @JoinColumn(name = "subscription_id"),
