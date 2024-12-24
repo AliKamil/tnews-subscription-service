@@ -34,6 +34,7 @@ public class SubscriptionService {
             categories.add(category);
         } else {
             subscription = new Subscription();
+            subscription.setId(id);
             categories = Set.of(category);
         }
         subscription.setCategories(categories);
@@ -48,6 +49,7 @@ public class SubscriptionService {
             keyWords.add(keyword);
         } else {
             subscription = new Subscription();
+            subscription.setId(id);
             keyWords = Set.of(keyword);
         }
         subscription.setKeyWords(keyWords);

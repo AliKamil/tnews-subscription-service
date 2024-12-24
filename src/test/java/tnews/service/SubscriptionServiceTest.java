@@ -121,8 +121,6 @@ class SubscriptionServiceTest {
 //    keyWordRepository.deleteById(keyWordId2);
 //    keyWordRepository.deleteById(keyWordId3);
 
-
-
 //    categoryRepository.deleteById(categoryId1);
 //    categoryRepository.deleteById(categoryId2);
 //    categoryRepository.deleteById(categoryId3);
@@ -150,31 +148,6 @@ class SubscriptionServiceTest {
     assertNotNull(persisted);
     assertNotNull(retrieved);
     assertEquals(persisted.getId(), retrieved.getId());
-//    for(int i = 0; i<persisted.getCategories().size(); i++) {
-//      assertEquals(
-//              persisted.getCategories().stream()
-//                      .sorted()
-//                      .toList()
-//                      .get(i),
-//              retrieved.getCategories().stream()
-//                      .sorted()
-//                      .toList()
-//                      .get(i)
-//      );
-//    }
-  //    assertEquals(persisted.getKeyWords().size(), retrieved.getKeyWords().size());
-//    for(int i = 0; i < persisted.getKeyWords().size(); i++) {
-//      assertEquals(
-//              persisted.getKeyWords().stream()
-//                      .sorted()
-//                      .toList()
-//                      .get(i),
-//              retrieved.getKeyWords().stream()
-//                      .sorted()
-//                      .toList()
-//                      .get(i)
-//      );
-//    }
     assertEquals(
             persisted.getTimeInterval().truncatedTo(ChronoUnit.MILLIS),
             retrieved.getTimeInterval().truncatedTo(ChronoUnit.MILLIS)
