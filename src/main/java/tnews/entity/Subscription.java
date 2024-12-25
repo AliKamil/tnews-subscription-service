@@ -1,6 +1,5 @@
 package tnews.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,31 +19,24 @@ import java.util.Set;
 @ToString
 public class Subscription {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(
             name = "subscription_keywords",
             joinColumns = @JoinColumn(name = "subscription_id"),
             inverseJoinColumns = @JoinColumn(name = "keyword_id")
     )
-//    @Transient
     private Set<KeyWord> keyWords;
 
-//    @OneToOne(mappedBy = "owner")
-//    @JsonBackReference
-//    private User owner;
+    private TimeInterval timeInterval;
 
-    private LocalDateTime timeInterval;
-
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(
             name = "subscription_categories",
             joinColumns = @JoinColumn(name = "subscription_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-//@Transient
     private Set<Category> categories;
 
     @CreationTimestamp
@@ -65,6 +57,5 @@ public class Subscription {
     public int hashCode() {
         return Objects.hash(id);
     }
-
 
 }

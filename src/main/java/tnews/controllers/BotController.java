@@ -35,13 +35,14 @@ public class BotController extends TelegramLongPollingBot {
                 }
             }
         } else if (update.hasCallbackQuery()) {
-            BotApiMethod<?> response = commandService.handleCallbackQuery(update);
-            if (response != null) {
-                try {
-                    // System.out.println("::::....Response:....:::: " + response.toString());
-                    execute(response);
-                } catch (TelegramApiException e) {
-                    e.printStackTrace();
+            List<BotApiMethod<?>> responses = commandService.handleCallbackQuery(update);
+            if (responses != null) {
+                for (BotApiMethod<?> response : responses) {
+                    try {
+                        execute(response);
+                    } catch (TelegramApiException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

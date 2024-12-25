@@ -31,11 +31,11 @@ class UserServiceTest {
 
     @BeforeEach
     public void setUp() {
-        User user1 = new User(1L, "FirstName", new Subscription(), LocalDateTime.now(),
+        User user1 = new User(1L, "FirstName", null, LocalDateTime.now(),
                 LocalDateTime.now(), UserAction.READY);
-        User user2 = new User(2L, "SecondName", new Subscription(), LocalDateTime.now(),
+        User user2 = new User(2L, "SecondName", null, LocalDateTime.now(),
                 LocalDateTime.now(), UserAction.READY);
-        User user3 = new User(3L, "ThirdName", new Subscription(), LocalDateTime.now(),
+        User user3 = new User(3L, "ThirdName", null, LocalDateTime.now(),
                 LocalDateTime.now(), UserAction.READY);
 
         User newUser1 = userRepository.save(user1);
@@ -60,7 +60,7 @@ class UserServiceTest {
                 Set.of(
                     new KeyWord(1L, "keyWord1", Set.of()),
                     new KeyWord(2L, "keyWord2", Set.of())),
-                LocalDateTime.now(),
+                TimeInterval.ONE_HOUR,
                 Set.of(
                         new Category(1L, "category1", Set.of()),
                         new Category(2L, "category2", Set.of())),
@@ -109,7 +109,7 @@ class UserServiceTest {
     @Test
     void update() {
         User user = userService.findById(ownerId1);
-        User replaceUser = new User(1L, "NEW_Name", new Subscription(), LocalDateTime.now(),
+        User replaceUser = new User(1L, "NEW_Name",null, LocalDateTime.now(),
                 LocalDateTime.now(), UserAction.WAITING_FOR_KEYWORD);
         User updatedUser = userService.update(user.getId(), replaceUser);
         assertNotNull(updatedUser);

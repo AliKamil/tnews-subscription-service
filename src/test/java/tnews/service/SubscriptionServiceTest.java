@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import tnews.entity.Category;
 import tnews.entity.KeyWord;
 import tnews.entity.Subscription;
+import tnews.entity.TimeInterval;
 import tnews.repository.CategoryRepository;
 import tnews.repository.KeyWordRepository;
 import tnews.repository.SubscriptionRepository;
@@ -78,25 +79,25 @@ class SubscriptionServiceTest {
     categoryId3 = savedCategory3.getId();
 
     Subscription subscription1 = new Subscription(
-            null,
+            1L, //TODO: id должен быть такой же как у User из-за связи OneToOne (не может быть подписки без пользователя)
             Set.of(savedKeyWord, savedKeyWord2, savedKeyWord3),
-            LocalDateTime.now(),
+            TimeInterval.ONE_DAY,
             Set.of(savedCategory, savedCategory2, savedCategory3),
             LocalDateTime.now(),
             LocalDateTime.now()
     );
     Subscription subscription2 = new Subscription(
-            null,
+            2L,
             Set.of(),
-            LocalDateTime.now(),
+            TimeInterval.ONE_MONTH,
             Set.of(savedCategory),
             LocalDateTime.now(),
             LocalDateTime.now()
     );
     Subscription subscription3 = new Subscription(
-            null,
+            3L,
             Set.of(savedKeyWord3, savedKeyWord),
-            LocalDateTime.now(),
+            TimeInterval.ONE_MONTH,
             Set.of(),
             LocalDateTime.now(),
             LocalDateTime.now()
@@ -121,8 +122,6 @@ class SubscriptionServiceTest {
 //    keyWordRepository.deleteById(keyWordId2);
 //    keyWordRepository.deleteById(keyWordId3);
 
-
-
 //    categoryRepository.deleteById(categoryId1);
 //    categoryRepository.deleteById(categoryId2);
 //    categoryRepository.deleteById(categoryId3);
@@ -135,10 +134,10 @@ class SubscriptionServiceTest {
   @Test
   void save() {
     Subscription subscription = new Subscription(
-        null,
+        4L,
         Set.of(Objects.requireNonNull(keyWordRepository.findById(keyWordId1).orElse(null)),
                 Objects.requireNonNull(keyWordRepository.findById(keyWordId2).orElse(null))),
-        LocalDateTime.now(),
+        TimeInterval.ONE_HOUR,
         Set.of(Objects.requireNonNull(categoryRepository.findById(categoryId1).orElse(null)),
                 Objects.requireNonNull(categoryRepository.findById(categoryId2).orElse(null))),
         LocalDateTime.now(),
@@ -150,35 +149,7 @@ class SubscriptionServiceTest {
     assertNotNull(persisted);
     assertNotNull(retrieved);
     assertEquals(persisted.getId(), retrieved.getId());
-//    for(int i = 0; i<persisted.getCategories().size(); i++) {
-//      assertEquals(
-//              persisted.getCategories().stream()
-//                      .sorted()
-//                      .toList()
-//                      .get(i),
-//              retrieved.getCategories().stream()
-//                      .sorted()
-//                      .toList()
-//                      .get(i)
-//      );
-//    }
-  //    assertEquals(persisted.getKeyWords().size(), retrieved.getKeyWords().size());
-//    for(int i = 0; i < persisted.getKeyWords().size(); i++) {
-//      assertEquals(
-//              persisted.getKeyWords().stream()
-//                      .sorted()
-//                      .toList()
-//                      .get(i),
-//              retrieved.getKeyWords().stream()
-//                      .sorted()
-//                      .toList()
-//                      .get(i)
-//      );
-//    }
-    assertEquals(
-            persisted.getTimeInterval().truncatedTo(ChronoUnit.MILLIS),
-            retrieved.getTimeInterval().truncatedTo(ChronoUnit.MILLIS)
-    );
+    assertEquals(persisted.getTimeInterval(), retrieved.getTimeInterval());
 
     Long id = retrieved.getId();
     subscriptionRepository.deleteById(id);
@@ -194,8 +165,7 @@ class SubscriptionServiceTest {
     assertEquals(subscriptions.size(), retrievedSubscriptions.size());
     for (int i = 0; i < subscriptions.size(); i++) {
       assertEquals(subscriptions.get(i).getId(), retrievedSubscriptions.get(i).getId());
-      assertEquals(subscriptions.get(i).getTimeInterval().truncatedTo(ChronoUnit.MILLIS),
-              retrievedSubscriptions.get(i).getTimeInterval().truncatedTo(ChronoUnit.MILLIS));
+      assertEquals(subscriptions.get(i).getTimeInterval(), retrievedSubscriptions.get(i).getTimeInterval());
     }
   }
 
@@ -207,8 +177,7 @@ class SubscriptionServiceTest {
     assertNotNull(retrieved);
 
     assertEquals(subscription.getId(), retrieved.getId());
-    assertEquals(subscription.getTimeInterval().truncatedTo(ChronoUnit.MILLIS),
-            retrieved.getTimeInterval().truncatedTo(ChronoUnit.MILLIS));
+    assertEquals(subscription.getTimeInterval(), retrieved.getTimeInterval());
   }
 
 }
