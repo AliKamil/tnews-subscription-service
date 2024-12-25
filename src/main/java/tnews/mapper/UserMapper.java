@@ -4,6 +4,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import tnews.dto.UserCreateDTO;
 import tnews.dto.UserResponseDTO;
 import tnews.entity.Subscription;
+import tnews.entity.TimeInterval;
 import tnews.entity.User;
 
 
@@ -15,7 +16,7 @@ public class UserMapper {
         Subscription newsSubscription = new Subscription();
         newsSubscription.setCategories(userCreateDTO.getCategories());
         newsSubscription.setKeyWords(userCreateDTO.getKeyWords());
-        newsSubscription.setTimeInterval(userCreateDTO.getTimeInterval());
+        newsSubscription.setTimeInterval(TimeInterval.valueOf(userCreateDTO.getTimeInterval()));    //TODO: не обработано исключение IllegalArgumentException (если не совпадает с TimeInterval)
         user.setSubscription(newsSubscription);
         return user;
     }
