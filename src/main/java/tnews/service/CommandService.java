@@ -7,12 +7,10 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
-import tnews.bot.Command;
-import tnews.bot.KeyboardFactory;
-import tnews.bot.Management;
+import tnews.bot.*;
 import tnews.entity.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -23,20 +21,6 @@ public class CommandService {
     private final KeyWordsService keyWordsService;
     private final SubscriptionService subscriptionService;
 
-    private SendMessage createMessage (Long id, String text) {
-        return SendMessage.builder()
-                .chatId(id)
-                .text(text)
-                .build();
-    }
-
-    private SendMessage createMessageWithReplyMarkup (Long id, String text, ReplyKeyboard replyMarkup) {
-        return SendMessage.builder()
-                .chatId(id)
-                .text(text)
-                .replyMarkup(replyMarkup)
-                .build();
-    }
 
     public List<BotApiMethod<?>> get(Update update) {
         Message message = update.getMessage();
@@ -51,91 +35,110 @@ public class CommandService {
                 user.setId(chatId);
                 user.setUsername(firstName);
                 userService.create(user);
-                SendMessage firstMessage = createMessage(chatId,
+                SendMessage firstMessage = MessageFactory.createMessage(chatId,
                         "Привет, " + firstName + "! Я новостной бот. Рад тебя видеть!");
-                SendMessage secondMessage = createMessageWithReplyMarkup(chatId,
+                SendMessage secondMessage = MessageFactory.createMessage(chatId,
                         "Как будем искать новости? (можно выбрать и категории и ключевые слова)",
                         KeyboardFactory.startButtons());
                 return List.of(firstMessage, secondMessage);
             }
-            if (Command.UPDATE_CATEGORY.getCom().equals(text)) {
-                Subscription subscription = subscriptionService.findById(chatId);
-                Set<Category> categories = subscription.getCategories();
-            }
+
         }   //TODO: пока обрабатывает только /start. Тут должно быть управление подпиской. Стоит заменить на switch?!
 
         User user = userService.findById(chatId);
         if(UserAction.WAITING_FOR_KEYWORD.equals(user.getCurrentAction())) {
             User updateUser = userService.addKeyword(chatId, text);
             if (updateUser == null) {
-                return List.of(createMessage(chatId, "Пользователь не найден :("));
+                return List.of(MessageFactory.createMessage(chatId, "Пользователь не найден :("));
             }
-            return List.of(createMessageWithReplyMarkup(chatId, "Ключевое слово: " + text + " добавлено!",
+            return List.of(MessageFactory.createMessage(chatId, "Ключевое слово: " + text + " добавлено!",
                             KeyboardFactory.settingMenu()));
         }
+
         if (Management.ADD.getValue().equals(text)) {
             if (user.getSubscription() != null) {
-                return List.of(createMessageWithReplyMarkup(chatId, "Подписка уже создана",
+                return List.of(MessageFactory.createMessage(chatId, "Подписка уже создана",
                                 KeyboardFactory.updateButtonsCategoryAndKeyword()));
             }
-            return List.of( createMessage(chatId, "Введите: " + Command.START.getCom()));
+            return List.of(MessageFactory.createMessage(chatId, "Введите: " + Command.START.getCom()));
         }
 
         if (Management.UPDATE.getValue().equals(text)) {
             if (user.getSubscription() == null) {
                 return List.of(
-                        createMessage(chatId, "Для начала необходимо создать подписку"),
-                        createMessage(chatId, "Введите: " + Command.START.getCom()));
+                        MessageFactory.createMessage(chatId, "Для начала необходимо создать подписку"),
+                        MessageFactory.createMessage(chatId, "Введите: " + Command.START.getCom()));
             }
             return List.of(
-                    createMessageWithReplyMarkup(chatId, "Что обновить?",
+                    MessageFactory.createMessage(chatId, "Что обновить?",
                             KeyboardFactory.updateButtonsCategoryAndKeyword()));
         }
         if (Management.DELETE.getValue().equals(text)) {
-            //TODO: нужно реализовать!!! может заменить на switch? (Management)
+            //TODO: нужно реализовать!!!
         }
 
-        return List.of(createMessageWithReplyMarkup(chatId, "Неизвестная команда",
+        return List.of(MessageFactory.createMessage(chatId, "Неизвестная команда",
                         KeyboardFactory.keyboardMarkup(user.getSubscription())));
     }
 
-    public BotApiMethod<?> handleCallbackQuery (Update update) {
+    public List<BotApiMethod<?>> handleCallbackQuery (Update update) {
         CallbackQuery callbackQuery = update.getCallbackQuery();
         String callbackData = callbackQuery.getData();
         Long chatId = callbackQuery.getMessage().getChatId();
+        if (Command.EXIT.getCom().equals(callbackData)) {
+            Subscription subscription = subscriptionService.findById(chatId);
+            if (subscription.getTimeInterval() == null) {
+                return List.of(
+                        MessageFactory.createMessage(chatId, "Настройка не закончена"),
+                        MessageFactory.createMessage(chatId, "Установите частоту обновления новостей"
+                            , KeyboardFactory.setTimeInterval()));
+            }
+            return List.of(MessageFactory.createMessage(chatId, "Тут должны появиться первые новости")); //TODO: НОВОСТИ ОТ АГРЕГАТОРА
+        }
+        if (Command.CATEGORY.getCom().equals(callbackData) || Command.ADD_CATEGORY.getCom().equals(callbackData)) { //TODO: нужно что-то вроде proxy для разного ответа
+            return List.of(MessageFactory.createMessage(chatId, "Выберите нужную категорию: ",
+                            KeyboardFactory.categoriesButtons()));
 
-        if (Command.CATEGORY.getCom().equals(callbackData)) {
-            return SendMessage.builder()
-                    .chatId(chatId.toString())
-                    .text("Выберите нужную категорию: ")
-                    .replyMarkup(KeyboardFactory.categoriesButtons())
-                    .build();
         } else if (Command.KEYWORD.getCom().equals(callbackData)) {
             userService.updateCurrentAction(chatId, UserAction.WAITING_FOR_KEYWORD.name());
-            return SendMessage.builder()
-                    .chatId(chatId)
-                    .text("Введите одно ключевое слово: ")
-                    .build();
+            return List.of(MessageFactory.createMessage(chatId, "Введите одно ключевое слово: "));
+
         } else if (Category1.isEnum(callbackData)) {
             User updateUser = userService.addCategory(chatId, callbackData);
             if (updateUser == null) {
-                return SendMessage.builder()
-                        .chatId(chatId)
-                        .text("Пользователь не найден :(")
-                        .build();
+                return List.of(MessageFactory.createMessage(chatId, "Пользователь не найден :("));
             }
-            return SendMessage.builder()
-                    .chatId(chatId)
-                    .text("Категория добавлена")
-                    .replyMarkup(KeyboardFactory.settingMenu())
-                    .build();
+            return List.of(MessageFactory.createMessage(chatId, "Категория добавлена",
+                    KeyboardFactory.settingMenu()));
+
             
+        } else if (Command.UPDATE_CATEGORY.getCom().equals(callbackData)) {
+            Subscription subscription = subscriptionService.findById(chatId);
+            Set<Category> categories = subscription.getCategories();
+            List<BotApiMethod<?>> outMsg = new ArrayList<>();
+            outMsg.add(MessageFactory.createMessage(chatId, "Ваши категории: "));
+            for (Category category : categories) {
+                outMsg.add(MessageFactory.createMessage(chatId, category.getCategoryName()));
+            }
+            outMsg.add(MessageFactory.createMessage(chatId, "С чего начнем?", KeyboardFactory.updateCategory()));
+            return outMsg;
+        } else if (Command.DELETE_CATEGORY.getCom().equals(callbackData)) {
+            Subscription subscription = subscriptionService.findById(chatId);
+            Set<Category> categories = subscription.getCategories();
+            return List.of(MessageFactory.createMessage(chatId, "Выбирете категорию для удаления",
+                    KeyboardFactory.deleteButtonsCategory(categories)));
+        } else if (Command.TIME_INTERVAL.getCom().equals(callbackData)) {
+            return List.of(MessageFactory.createMessage(chatId, "Как часто хотите получать новости?",
+                    KeyboardFactory.setTimeInterval()));
+        } else if (TimeInterval.isEmun(callbackData)) {
+            Subscription subscription = subscriptionService.findById(chatId);
+            subscription.setTimeInterval(TimeInterval.valueOf(callbackData));
+            subscriptionService.save(subscription);
+            return List.of(MessageFactory.createMessage(chatId, "Временной интервал успешно добавлен",
+                    KeyboardFactory.settingMenu()));
         }
 
-        return SendMessage.builder()
-                .chatId(chatId.toString())
-                .text("Неизвестная команда")
-                .build();
+        return List.of(MessageFactory.createMessage(chatId, "Неизвестная команда"));
     }
 
 }

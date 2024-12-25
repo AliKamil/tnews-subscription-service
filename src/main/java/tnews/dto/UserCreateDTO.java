@@ -18,7 +18,7 @@ public class UserCreateDTO {
     private String username;
     @NotNull(message = "At least one keyword is required for the search")
     private Set<KeyWord> keyWords;
-    private LocalDateTime timeInterval;
+    private String timeInterval;
     @NotNull(message = "At least one category is required for the search")
     private Set<Category> categories;
 }
