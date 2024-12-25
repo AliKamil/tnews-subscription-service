@@ -27,7 +27,13 @@ class CustomizedSaveImpl implements CustomizedSave<Subscription> {
     if (entity.getKeyWords() != null) {
        entity.setKeyWords(entity.getKeyWords().stream().map(session::merge).collect(Collectors.toSet()));
     }
-    session.persist(entity);
-    return session.merge(entity);
+//    session.persist(entity);
+//    return session.merge(entity);
+    if (entity.getId() != null && session.find(Subscription.class, entity.getId()) != null) {
+      return session.merge(entity);
+    } else {
+      session.persist(entity);
+      return entity;
+    }
   }
 }
