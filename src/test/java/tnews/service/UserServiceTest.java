@@ -31,7 +31,7 @@ class UserServiceTest {
 
     @BeforeEach
     public void setUp() {
-        User user1 = new User(1L, "FirstName", null, LocalDateTime.now(),
+        User user1 = new User(1L, "FirstName", null, LocalDateTime.now(),//TODO: хардкодить id не хорошо, нужно переделать!
                 LocalDateTime.now(), UserAction.READY);
         User user2 = new User(2L, "SecondName", null, LocalDateTime.now(),
                 LocalDateTime.now(), UserAction.READY);

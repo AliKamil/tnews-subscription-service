@@ -39,14 +39,14 @@ public class UserService {
     }
 
     public User addCategory(Long id, String category) {
-        Category categoryObj = new Category();
-        categoryObj.setCategoryName(category);
-        Category savedCategory = categoryService.save(categoryObj);
-        Subscription subscription = subscriptionService.addCategory(id, savedCategory);
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
             return null;
         }
+        Category categoryObj = new Category();
+        categoryObj.setCategoryName(category);
+        Category savedCategory = categoryService.save(categoryObj);
+        Subscription subscription = subscriptionService.addCategory(id, savedCategory);
         user.setSubscription(subscription);
         return userRepository.save(user);
     }
