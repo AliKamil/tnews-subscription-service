@@ -23,5 +23,13 @@ public enum Command {
 
     private final String com;
 
+    public static Command fromString(String com) {
+        for (Command command : Command.values()) {
+            if (command.com.equalsIgnoreCase(com.trim())) {
+                return command;
+            }
+        }
+        throw new IllegalArgumentException("Unknown Command: " + com);
+    }
 
 }
