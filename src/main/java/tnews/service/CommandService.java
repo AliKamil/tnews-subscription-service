@@ -51,11 +51,10 @@ public class CommandService {
                     return updateSubscription(chatId, user);
                 }
                 case DELETE -> {
-                    return deleteSubscription(chatId, user);
+                    return exactlyDeleteSubscription(chatId);
                 }
             }
         }
-
 
         if(UserAction.WAITING_FOR_KEYWORD.equals(user.getCurrentAction())) {
             return createKeyword(chatId, text);
@@ -92,12 +91,22 @@ public class CommandService {
                 case DELETE_CATEGORY -> {
                     return deleteCategory(chatId);
                 }
-                case TIME_INTERVAL -> {
-                    return List.of(MessageFactory.createMessage(chatId, "Как часто хотите получать новости?",
-                            KeyboardFactory.setTimeInterval()));
+                case TIME_INTERVAL,
+                     UPDATE_TIME_INTERVAL -> {
+                    return chooseTimeInterval(chatId);
                 }
+
                 case EXIT -> {
                     return exit(chatId);
+                }
+                case DELETE -> {
+                    return deleteSubscription(chatId);
+                }
+                case UPDATE -> {
+                    return updateSubscription(chatId);
+                }
+                case START -> {
+                    return start(chatId, callbackQuery.getFrom().getFirstName());
                 }
 
             }
@@ -113,23 +122,54 @@ public class CommandService {
 
     private List<BotApiMethod<?>> addSubscription (Long chatId, User user) {
         if (user.getSubscription() != null) {
-            return List.of(MessageFactory.createMessage(chatId, "Подписка уже создана",
-                    KeyboardFactory.updateButtonsCategoryAndKeyword()));
+            return List.of(
+                    MessageFactory.createMessage(chatId, "Подписка уже создана",
+                            KeyboardFactory.keyboardMarkup(user.getSubscription())),
+                    MessageFactory.createMessage(chatId, "Желаете обновить подписку?",
+                            KeyboardFactory.chooseUpdateSubscription())
+                    );
         }
-        return List.of(MessageFactory.createMessage(chatId, "Введите: " + Command.START.getCom()));
+        return start(chatId, user.getUsername());
     }
+
     private List<BotApiMethod<?>> updateSubscription (Long chatId, User user) {
         if (user.getSubscription() == null) {
             return List.of(
-                    MessageFactory.createMessage(chatId, "Для начала необходимо создать подписку"),
-                    MessageFactory.createMessage(chatId, "Введите: " + Command.START.getCom()));
+                    MessageFactory.createMessage(chatId, "Для начала необходимо создать подписку",
+                            KeyboardFactory.createSubscription()));
         }
         return List.of(
                 MessageFactory.createMessage(chatId, "Что обновить?",
                         KeyboardFactory.updateButtonsCategoryAndKeyword()));
     }
-    private List<BotApiMethod<?>> deleteSubscription (Long chatId, User user) {
-        return List.of(MessageFactory.createMessage(chatId, "Вы точно хотите удалить подписку?")); // TODO: реализовать надо!!
+
+    private List<BotApiMethod<?>> updateSubscription (Long chatId) {
+        User user = userService.findById(chatId);
+        if (user.getSubscription() == null) {
+            return List.of(
+                    MessageFactory.createMessage(chatId, "Для начала необходимо создать подписку",
+                            KeyboardFactory.createSubscription()));
+        }
+        return List.of(MessageFactory.createMessage(chatId, "Что обновить?",
+                        KeyboardFactory.updateButtonsCategoryAndKeyword()));
+    }
+
+    private List<BotApiMethod<?>> exactlyDeleteSubscription(Long chatId) {
+        return List.of(MessageFactory.createMessage(chatId, "Вы точно хотите удалить подписку?",
+                KeyboardFactory.deleteSubscription())); // TODO: реализовать надо!!
+    }
+    private List<BotApiMethod<?>> deleteSubscription (Long chatId) {
+        User user = userService.findById(chatId);
+        if (user.getSubscription() == null) {
+            return List.of(MessageFactory.createMessage(chatId, "Подписка еще не создана",
+                    KeyboardFactory.keyboardMarkup(null)));
+        }
+        subscriptionService.deleteById(chatId);
+        return List.of(
+                MessageFactory.createMessage(chatId, "Подписка удалена"),
+                MessageFactory.createMessage(chatId, "\uD83D\uDE22",
+                        KeyboardFactory.keyboardMarkup(null))
+        );
     }
 
     private List<BotApiMethod<?>> start (Long chatId, String firstName) {
@@ -183,12 +223,32 @@ public class CommandService {
                 KeyboardFactory.deleteButtonsCategory(categories)));
     }
     private List<BotApiMethod<?>> addTimeInterval (Long chatId, String callbackData) {
+        User user = userService.findById(chatId);
         Subscription subscription = subscriptionService.findById(chatId);
         subscription.setTimeInterval(TimeInterval.valueOf(callbackData));
         subscriptionService.save(subscription);
-        return List.of(MessageFactory.createMessage(chatId, "Временной интервал успешно добавлен",
-                KeyboardFactory.settingMenu()));
+        if (user.getCurrentAction().equals(UserAction.READY)) {}
+        switch (user.getCurrentAction()) {
+            case READY -> {
+                return List.of(MessageFactory.createMessage(chatId, "Временной интервал успешно добавлен",
+                        KeyboardFactory.settingMenu()));
+            }
+            case UPDATE -> {
+                return List.of(MessageFactory.createMessage(chatId, "Временной интервал обнавлен",
+                        KeyboardFactory.updateMenu()));
+            }
+            default -> {
+                return List.of(MessageFactory.createMessage(chatId, "Неизвестная команда"));
+            }
+        }
+
     }
+
+    private List<BotApiMethod<?>> chooseTimeInterval (Long chatId) {
+        return List.of(MessageFactory.createMessage(chatId, "Как часто хотите получать новости?",
+                KeyboardFactory.setTimeInterval()));
+    }
+
     private List<BotApiMethod<?>> exit (Long chatId) {
         Subscription subscription = subscriptionService.findById(chatId);
         if (subscription.getTimeInterval() == null) {
