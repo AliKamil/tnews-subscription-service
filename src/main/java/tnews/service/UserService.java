@@ -52,14 +52,15 @@ public class UserService {
     }
 
     public User addKeyword(Long id, String keyword) {
-        KeyWord keyWordObj = new KeyWord();
-        keyWordObj.setKeyword(keyword);
-        KeyWord savedKeyWord = keyWordsService.saveKeyWord(keyWordObj);
-        Subscription subscription = subscriptionService.addKeyWord(id, savedKeyWord);
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
             return null;
         }
+        KeyWord keyWordObj = new KeyWord();
+        keyWordObj.setKeyword(keyword);
+        KeyWord savedKeyWord = keyWordsService.saveKeyWord(keyWordObj);
+        Subscription subscription = subscriptionService.addKeyWord(id, savedKeyWord);
+
         user.setSubscription(subscription);
         user.setCurrentAction(UserAction.READY);
         return userRepository.save(user);
