@@ -39,6 +39,15 @@ public class KeyboardFactory {
         return createInlineKeyboard(buttons, 1);
     }
 
+    public static InlineKeyboardMarkup updateMenu() {
+        Map<String, String> buttons = new LinkedHashMap<>();
+        buttons.put("КАТЕГОРИИ", Command.UPDATE_CATEGORY.getCom());
+        buttons.put("КЛЮЧЕВЫЕ СЛОВА", Command.UPDATE_KEYWORD.getCom());
+        buttons.put("ЧАСТОТА ОБНОВЛЕНИЯ", Command.UPDATE_TIME_INTERVAL.getCom());
+        buttons.put("ЗАКОНЧИТЬ НАСТРОЙКУ", Command.EXIT.getCom());
+        return createInlineKeyboard(buttons, 1);
+    }
+
     public static InlineKeyboardMarkup deleteButtonsCategory(Set<Category> categories) {
         Map<String, String> buttons = new LinkedHashMap<>();
         for (Category category : categories) {
@@ -70,6 +79,7 @@ public class KeyboardFactory {
         Map<String, String> buttons = new LinkedHashMap<>();
         buttons.put("ДОБАВИТЬ", Command.ADD_KEYWORD.getCom());
         buttons.put("УДАЛИТЬ", Command.DELETE_KEYWORD.getCom());
+        buttons.put("ОТМЕНА", Command.CANCELLATION.getCom());
         return createInlineKeyboard(buttons, 2);
     }
 
@@ -79,6 +89,26 @@ public class KeyboardFactory {
         buttons.put("РАЗ В ДЕНЬ", TimeInterval.ONE_DAY.name());
         buttons.put("КАЖДУЮ НЕДЕЛЮ", TimeInterval.ONE_WEEK.name());
         buttons.put("РАЗ В МЕСЯЦ", TimeInterval.ONE_MONTH.name());
+        return createInlineKeyboard(buttons, 2);
+    }
+
+    public static InlineKeyboardMarkup createSubscription() {
+        Map<String, String> buttons = new LinkedHashMap<>();
+        buttons.put("СОЗДАТЬ ПОДПИСКУ", Command.START.getCom());
+        return createInlineKeyboard(buttons, 1);
+    }
+
+    public static InlineKeyboardMarkup deleteSubscription() {
+        Map<String, String> buttons = new LinkedHashMap<>();
+        buttons.put("ДА", Command.DELETE.getCom());
+        buttons.put("НЕТ", Command.CANCELLATION.getCom());
+        return createInlineKeyboard(buttons, 2);
+    }
+
+    public static InlineKeyboardMarkup chooseUpdateSubscription() {
+        Map<String, String> buttons = new LinkedHashMap<>();
+        buttons.put("ДА", Command.UPDATE.getCom());
+        buttons.put("НЕТ", Command.CANCELLATION.getCom());
         return createInlineKeyboard(buttons, 2);
     }
 
