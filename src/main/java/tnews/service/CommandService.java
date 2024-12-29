@@ -85,6 +85,12 @@ public class CommandService {
                 case KEYWORD -> {
                     return addKeyWord(chatId);
                 }
+                case UPDATE_KEYWORD -> {
+                    return updateKeyWord(chatId);
+                }
+                case DELETE_KEYWORD -> {
+                    return deleteKeyWord(chatId);
+                }
                 case UPDATE_CATEGORY -> {
                     return updateCategory(chatId);
                 }
@@ -138,6 +144,7 @@ public class CommandService {
                     MessageFactory.createMessage(chatId, "Для начала необходимо создать подписку",
                             KeyboardFactory.createSubscription()));
         }
+        userService.updateCurrentAction(chatId, UserAction.UPDATE.name());
         return List.of(
                 MessageFactory.createMessage(chatId, "Что обновить?",
                         KeyboardFactory.updateButtonsCategoryAndKeyword()));
@@ -150,13 +157,14 @@ public class CommandService {
                     MessageFactory.createMessage(chatId, "Для начала необходимо создать подписку",
                             KeyboardFactory.createSubscription()));
         }
+        userService.updateCurrentAction(chatId, UserAction.UPDATE.name());
         return List.of(MessageFactory.createMessage(chatId, "Что обновить?",
                         KeyboardFactory.updateButtonsCategoryAndKeyword()));
     }
 
     private List<BotApiMethod<?>> exactlyDeleteSubscription(Long chatId) {
         return List.of(MessageFactory.createMessage(chatId, "Вы точно хотите удалить подписку?",
-                KeyboardFactory.deleteSubscription())); // TODO: реализовать надо!!
+                KeyboardFactory.deleteSubscription()));
     }
     private List<BotApiMethod<?>> deleteSubscription (Long chatId) {
         User user = userService.findById(chatId);
@@ -176,6 +184,7 @@ public class CommandService {
         User user = new User();
         user.setId(chatId);
         user.setUsername(firstName);
+        user.setCurrentAction(UserAction.READY);
         userService.create(user);
         SendMessage firstMessage = MessageFactory.createMessage(chatId,
                 "Привет, " + firstName + "! Я новостной бот. Рад тебя видеть!");
@@ -189,6 +198,7 @@ public class CommandService {
         if (updateUser == null) {
             return List.of(MessageFactory.createMessage(chatId, "Пользователь не найден :("));
         }
+        userService.updateCurrentAction(chatId, UserAction.READY.name());
         return List.of(MessageFactory.createMessage(chatId, "Ключевое слово: " + keyword + " добавлено!",
                 KeyboardFactory.settingMenu()));
     }
@@ -197,6 +207,27 @@ public class CommandService {
         userService.updateCurrentAction(chatId, UserAction.WAITING_FOR_KEYWORD.name());
         return List.of(MessageFactory.createMessage(chatId, "Введите одно ключевое слово: "));
     }
+    private List<BotApiMethod<?>> updateKeyWord (Long chatId) {
+        Subscription subscription = subscriptionService.findById(chatId);
+        Set<KeyWord> keyWords = subscription.getKeyWords();
+        List<String> keyWordsList = new ArrayList<>();
+        for (KeyWord keyWord : keyWords) {
+            keyWordsList.add(keyWord.getKeyword());
+        }
+        return List.of(
+          MessageFactory.createMessage(chatId, "Ваши ключевые слова:"),
+          MessageFactory.createMessage(chatId, keyWordsList.toString()),
+          MessageFactory.createMessage(chatId, "С чего начнем?",
+                  KeyboardFactory.updateKeyWord())
+        );
+    }
+    private List<BotApiMethod<?>> deleteKeyWord (Long chatId) {
+        Subscription subscription = subscriptionService.findById(chatId);
+        Set<KeyWord> keyWords = subscription.getKeyWords();
+        return List.of(MessageFactory.createMessage(chatId, "Выбирете ключевое слово для удаления",
+                KeyboardFactory.deleteButtonKeyWord(keyWords)));
+    }
+
     private List<BotApiMethod<?>> addCategory (Long chatId, String callbackData) {
         User updateUser = userService.addCategory(chatId, callbackData);
         if (updateUser == null) {
@@ -209,10 +240,12 @@ public class CommandService {
         Subscription subscription = subscriptionService.findById(chatId);
         Set<Category> categories = subscription.getCategories();
         List<BotApiMethod<?>> outMsg = new ArrayList<>();
+        List<String> categoryNames = new ArrayList<>();
         outMsg.add(MessageFactory.createMessage(chatId, "Ваши категории: "));
         for (Category category : categories) {
-            outMsg.add(MessageFactory.createMessage(chatId, category.getCategoryName()));
+            categoryNames.add(category.getCategoryName());
         }
+        outMsg.add(MessageFactory.createMessage(chatId, categoryNames.toString()));
         outMsg.add(MessageFactory.createMessage(chatId, "С чего начнем?", KeyboardFactory.updateCategory()));
         return outMsg;
     }
@@ -227,7 +260,6 @@ public class CommandService {
         Subscription subscription = subscriptionService.findById(chatId);
         subscription.setTimeInterval(TimeInterval.valueOf(callbackData));
         subscriptionService.save(subscription);
-        if (user.getCurrentAction().equals(UserAction.READY)) {}
         switch (user.getCurrentAction()) {
             case READY -> {
                 return List.of(MessageFactory.createMessage(chatId, "Временной интервал успешно добавлен",
@@ -257,6 +289,7 @@ public class CommandService {
                     MessageFactory.createMessage(chatId, "Установите частоту обновления новостей"
                             , KeyboardFactory.setTimeInterval()));
         }
+        userService.updateCurrentAction(chatId, UserAction.READY.name());
         return List.of(MessageFactory.createMessage(chatId, "Тут должны появиться первые новости"));
     }
 

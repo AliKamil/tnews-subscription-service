@@ -5,10 +5,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-import tnews.entity.Category;
-import tnews.entity.Category1;
-import tnews.entity.Subscription;
-import tnews.entity.TimeInterval;
+import tnews.entity.*;
 
 import java.util.*;
 
@@ -83,6 +80,15 @@ public class KeyboardFactory {
         return createInlineKeyboard(buttons, 2);
     }
 
+    public static InlineKeyboardMarkup deleteButtonKeyWord(Set<KeyWord> keyWords) {
+        Map<String, String> buttons = new LinkedHashMap<>(); //TODO: либо писать логику для обработки двух ключевых слов, либо изменять UserAction и передавать одно ключевое слово
+        for (KeyWord keyWord : keyWords) {
+            buttons.put(keyWord.getKeyword(), Command.DELETE_KEYWORD.getCom() + " " + keyWord.getKeyword());
+        }
+        buttons.put("ОТМЕНА", Command.DELETE_KEYWORD.getCom() + " " + Command.CANCELLATION.getCom());
+        return createInlineKeyboard(buttons, 3);
+    }
+
     public static InlineKeyboardMarkup setTimeInterval() {
         Map<String, String> buttons = new LinkedHashMap<>();
         buttons.put("КАЖДЫЙ ЧАС", TimeInterval.ONE_HOUR.name());
@@ -101,14 +107,14 @@ public class KeyboardFactory {
     public static InlineKeyboardMarkup deleteSubscription() {
         Map<String, String> buttons = new LinkedHashMap<>();
         buttons.put("ДА", Command.DELETE.getCom());
-        buttons.put("НЕТ", Command.CANCELLATION.getCom());
+        buttons.put("НЕТ", Command.EXIT.getCom());
         return createInlineKeyboard(buttons, 2);
     }
 
     public static InlineKeyboardMarkup chooseUpdateSubscription() {
         Map<String, String> buttons = new LinkedHashMap<>();
         buttons.put("ДА", Command.UPDATE.getCom());
-        buttons.put("НЕТ", Command.CANCELLATION.getCom());
+        buttons.put("НЕТ", Command.EXIT.getCom());
         return createInlineKeyboard(buttons, 2);
     }
 
