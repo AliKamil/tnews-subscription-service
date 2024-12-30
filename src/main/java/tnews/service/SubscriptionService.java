@@ -59,6 +59,9 @@ public class SubscriptionService {
     public Subscription save(Subscription subscription) {
         return subscriptionRepository.save(subscription);
     }
+    public void deleteById(Long id) {
+        subscriptionRepository.deleteById(id);
+    }
 
 //    public Set<Category> getCategoriesBySubscriptionId(Long id) {
 //        Subscription subscription = findById(id);

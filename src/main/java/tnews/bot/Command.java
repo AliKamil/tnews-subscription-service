@@ -7,6 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Command {
     START("/start"),
+    DELETE("/delete"),
+    UPDATE("/update"),
     TEST("/test"),
     CATEGORY("/category"),
     KEYWORD("/keyWord"),
@@ -18,10 +20,19 @@ public enum Command {
     ADD_KEYWORD("/addKeyword"),
     DELETE_CATEGORY("/deleteCategory"),
     DELETE_KEYWORD("/deleteKeyword"),
+    DELETE_TIME_INTERVAL("/deleteTimeInterval"),
     CANCELLATION("/cancellation"),
     EXIT("/exit");
 
     private final String com;
 
+    public static Command fromString(String com) {
+        for (Command command : Command.values()) {
+            if (command.com.equalsIgnoreCase(com.trim())) {
+                return command;
+            }
+        }
+        throw new IllegalArgumentException("Unknown Command: " + com);
+    }
 
 }
