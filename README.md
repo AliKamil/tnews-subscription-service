@@ -1,4 +1,4 @@
-# tnews-subscription-service
+# subscription-subscription-service
 Subscription management service for TNews project
 
 Проект позволяет пользователю получать подборку новостей в телеграм бот с определенной периодичностью.
