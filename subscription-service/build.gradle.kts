@@ -27,19 +27,17 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.telegram:telegrambots-spring-boot-starter:6.9.7.1")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
-    implementation("org.telegram:telegrambots-spring-boot-starter:6.9.7.1")
-
-    testImplementation("com.h2database:h2")
     runtimeOnly("org.postgresql:postgresql")
 
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("com.h2database:h2")
 }
 
 tasks.withType<Test> {
