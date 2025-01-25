@@ -1,10 +1,8 @@
-package aggregator;
+package aggregator.service;
 
 import aggregator.entity.News;
 import aggregator.repository.NewsRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
