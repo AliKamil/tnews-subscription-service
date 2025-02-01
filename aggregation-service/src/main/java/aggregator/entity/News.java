@@ -8,7 +8,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "news")
 public class News {
     @Id
-    String id;
-    String title;
-    String content;
+    private String id;
+    private String title;
+    private String content;
+    private String url;
+    private String publishedAt;
+    //TODO: можно сохранять ссылки на изображения, чтобы в боте был не просто сухой текст
 }
