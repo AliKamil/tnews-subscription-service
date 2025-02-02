@@ -1,5 +1,7 @@
 package aggregator.service;
 
+import aggregator.entity.News;
+import aggregator.repository.NewsRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,8 +11,23 @@ class NewsServiceTest {
    @Autowired
    private NewsService newsService;
 
+   @Autowired
+   private NewsRepository newsRepository;
+
     @Test
-    void addNews() {
-        newsService.testMongo();
+    public void testMongo() {
+        News news = new News();
+        news.setTitle("Заголовок новости");
+        news.setContent("Содержание новости");
+        news = newsRepository.save(news);
+
+        News savedNews = newsRepository.findById(news.getId()).orElse(null);
+        if (savedNews != null) {
+            System.out.println("Новость найдена: " + savedNews.getTitle());
+            System.out.println("ID новости: " + news.getId());
+        } else {
+            System.out.println("Новость не найдена");
+        }
     }
+
 }
