@@ -29,10 +29,7 @@ public class NewsService {
         List<News> newsList = new ArrayList<>();
         // получаем JSON по ссылке
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-        HttpEntity<String> request = new HttpEntity<>("", headers);
+        HttpEntity<String> request = new HttpEntity<>("", new HttpHeaders());
         ResponseEntity<String> response = restTemplate.exchange(DZEN_URL, HttpMethod.POST, request, String.class);
         String json = response.getBody();
         // Обработка JSON
@@ -50,8 +47,6 @@ public class NewsService {
                 newsList.add(newNews);
             }
             newsRepository.saveAll(newsList);
-            // убрать!!!
-            System.out.println("News fetched successfully: " + newsList.size());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
