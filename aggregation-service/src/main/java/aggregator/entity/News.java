@@ -2,6 +2,7 @@ package aggregator.entity;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
@@ -13,5 +14,7 @@ public class News {
     private String content;
     private String url;
     private String publishedAt;
+    @Indexed
+    private String category;
     //TODO: можно сохранять ссылки на изображения, чтобы в боте был не просто сухой текст
 }

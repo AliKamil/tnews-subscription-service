@@ -44,6 +44,7 @@ public class NewsService {
                 newNews.setContent(story.path("annotation").asText());
                 newNews.setUrl(story.path("url").asText());
                 newNews.setPublishedAt(story.path("timestampInTop").asText());
+                newNews.setCategory(story.path("bestRubricName").asText());
                 newsList.add(newNews);
             }
             newsRepository.saveAll(newsList);
@@ -51,6 +52,10 @@ public class NewsService {
             e.printStackTrace();
         }
         return newsList;
+    }
+
+    public List<String> getCategories() {
+        return newsRepository.findDistinctCategories();
     }
 
 
