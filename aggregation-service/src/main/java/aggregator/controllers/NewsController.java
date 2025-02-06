@@ -20,4 +20,9 @@ public class NewsController {
     public List<News> fetchNews() {
         return newsService.fetchAndSaveNews();
     }
+
+    @GetMapping("/categories")
+    public List<String> getCategories() {
+        return newsService.getCategories();
+    }
 }

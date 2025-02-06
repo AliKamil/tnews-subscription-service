@@ -1,16 +1,21 @@
 package subscription.service;
 
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import subscription.client.AggregatorClient;
 import subscription.entity.Category;
+import subscription.mapper.CategoryMapper;
 import subscription.repository.CategoryRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class CategoryService {
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
+    private final AggregatorClient aggregatorClient;
 
     public List<Category> findAll() {
         return categoryRepository.findAll();
@@ -29,6 +34,14 @@ public class CategoryService {
 
     public Category findByCategoryName(String categoryName) {
         return categoryRepository.findByCategoryName(categoryName);
+    }
+
+    public List<Category> updateCategories() {
+        List<String> categories = aggregatorClient.getCategories();
+        for (String categoryName : categories) {
+            save(CategoryMapper.fromString(categoryName));
+        }
+        return findAll();
     }
 
 

@@ -1,10 +1,8 @@
-server:
-  port: 8081
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5555/tnews_DB
-    username: tnews_DB
-    password: postgres_tnews_DB
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   feign:
     client:
@@ -12,7 +10,6 @@ spring:
         default:
           connectTimeout: 5000
           readTimeout: 5000
-
 
   jpa:
     show-sql: true
@@ -28,4 +25,4 @@ bot:
 
 aggregator:
   service:
-    url: http://localhost:8080/news
+    url: ${AGGREGATOR_SERVICE_URL}
