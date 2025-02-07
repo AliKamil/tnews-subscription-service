@@ -2,11 +2,14 @@ package subscription.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import subscription.client.AggregatorClient;
+import subscription.dto.NewsDto;
 import subscription.entity.Category;
 import subscription.entity.KeyWord;
 import subscription.entity.Subscription;
 import subscription.repository.SubscriptionRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -15,6 +18,7 @@ import java.util.Set;
 public class SubscriptionService {
     private SubscriptionRepository subscriptionRepository;
     private CategoryService categoryService;
+    private AggregatorClient aggregatorClient;
 
     public List<Subscription> findAll() {
         return subscriptionRepository.findAll();
@@ -61,10 +65,16 @@ public class SubscriptionService {
         subscriptionRepository.deleteById(id);
     }
 
-//    public Set<Category> getCategoriesBySubscriptionId(Long id) {
-//        Subscription subscription = findById(id);
-//        Hibernate.initialize(subscription.getCategories());
-//        return subscription.getCategories();
-//    }
+    public List<String> getNewsByCategory(String category) { // скорее всего лишнее
+        return aggregatorClient.getNewsByCategory(category);
+    }
+
+    public List<List<String>> getNewsByCategories(Set<String> categories) {
+        List<List<String>> news = new ArrayList<>();
+        for (String category : categories) {
+            news.add(aggregatorClient.getNewsByCategory(category));
+        }
+        return news;
+    }
 
 }

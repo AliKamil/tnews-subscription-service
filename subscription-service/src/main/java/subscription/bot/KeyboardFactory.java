@@ -55,9 +55,9 @@ public class KeyboardFactory {
 
     }
 
-    public static InlineKeyboardMarkup categoriesButtons() { //TODO: категории будут подтягиваться с агрегатора (нужно будет переделать)
+    public static InlineKeyboardMarkup categoriesButtons(List<Category> categories) {
         Map<String, String> buttons = new LinkedHashMap<>();
-        for (Category category : Category.class.getEnumConstants()) {
+        for (Category category : categories) {
             buttons.put(category.getCategoryName(), category.getCategoryName());
         }
         return createInlineKeyboard(buttons, 3);
