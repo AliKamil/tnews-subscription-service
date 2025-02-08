@@ -14,8 +14,11 @@ import subscription.bot.MessageFactory;
 import subscription.entity.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 @AllArgsConstructor
@@ -23,6 +26,7 @@ public class CommandService {
     private final UserService userService;
     private final KeyWordsService keyWordsService;
     private final SubscriptionService subscriptionService;
+    private final CategoryService categoryService;
 
 
     public List<BotApiMethod<?>> get(Update update) {
@@ -82,8 +86,9 @@ public class CommandService {
         if (command != null) {
             switch (command) {
                 case CATEGORY -> {
+                    List<Category> categories = categoryService.findAll(); // стоит ли переписать на Set?
                     return List.of(MessageFactory.createMessage(chatId, "Выберите нужную категорию: ",
-                            KeyboardFactory.categoriesButtons()));
+                            KeyboardFactory.categoriesButtons(categories)));
                 }
                 case KEYWORD -> {
                     return addKeyWord(chatId);
@@ -120,11 +125,11 @@ public class CommandService {
 
             }
         }
-        if (Category1.isEnum(callbackData)) {
-            return addCategory(chatId, callbackData);
-        }
         if (TimeInterval.isEmun(callbackData)) {
             return addTimeInterval(chatId, callbackData);
+        }
+        if (categoryService.findByCategoryName(callbackData) != null) {
+            return addCategory(chatId, callbackData);
         }
         return List.of(MessageFactory.createMessage(chatId, "Неизвестная команда"));
     }
@@ -293,7 +298,17 @@ public class CommandService {
                             , KeyboardFactory.setTimeInterval()));
         }
         userService.updateCurrentAction(chatId, UserAction.READY.name());
-        return List.of(MessageFactory.createMessage(chatId, "Тут должны появиться первые новости"));
+        Set<String> categories = subscription.getCategories().stream()
+                .map(Category::getCategoryName)
+                .collect(Collectors.toSet());
+        List<List<String>> news = subscriptionService.getNewsByCategories(categories);
+
+        return Stream.concat(
+                Stream.of(MessageFactory.createMessage(chatId, "Тут должны появиться первые новости")),
+                news.stream()
+                        .flatMap(Collection::stream)
+                        .map(story -> MessageFactory.createMessage(chatId, story))
+        ).collect(Collectors.toList());
     }
 
 }

@@ -58,5 +58,9 @@ public class NewsService {
         return newsRepository.findDistinctCategories();
     }
 
+    public List<News> getNewsByCategory(String category) {
+        return newsRepository.findByCategory(category);
+    }
+
 
 }
