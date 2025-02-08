@@ -8,4 +8,5 @@ public class CategoryMapper {
         category.setCategoryName(categoryString);
         return category;
     }
+
 }

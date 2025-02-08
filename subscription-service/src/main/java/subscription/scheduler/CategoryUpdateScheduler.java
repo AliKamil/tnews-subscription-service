@@ -10,8 +10,8 @@ import subscription.service.CategoryService;
 public class CategoryUpdateScheduler {
     private final CategoryService categoryService;
 
-    // @Scheduled(fixedRate = 86400000) // обновление категорий раз в день
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 86400000) // обновление категорий раз в день
+    // @Scheduled(fixedRate = 10000) // 10 секунд для тестов
     public void scheduleCategoryUpdate() {
         categoryService.updateCategories();
     }
