@@ -4,7 +4,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.6"
 }
 
-group = "client"
+group = "tnews.aggregation-client"
 version = "1.0"
 
 java {
@@ -25,15 +25,9 @@ repositories {
 
 dependencies {
 
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:3.0.3")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
-
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
