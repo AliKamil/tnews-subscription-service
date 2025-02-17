@@ -10,9 +10,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableJpaRepositories
 @EnableScheduling
-@EnableFeignClients
-@ComponentScan("tnews")
-//@ComponentScan(basePackages = {"tnews.subscription", "tnews.aggregator.client"})
+@EnableFeignClients(basePackages = {"tnews.subscription", "tnews.aggregator.client"})
+@ComponentScan(basePackages = {"tnews.subscription", "tnews.aggregator.client"})
 public class ApplicationSubscription {
     public static void main(String[] args) {
         SpringApplication.run(ApplicationSubscription.class, args);

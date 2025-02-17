@@ -1,10 +1,9 @@
 plugins {
-    java
-    id("org.springframework.boot") version "3.4.0"
-    id("io.spring.dependency-management") version "1.1.6"
+    `java-library`
+    id("io.freefair.lombok") version "8.12.1"
 }
 
-group = "tnews.aggregation-client"
+group = "tnews:aggregation-client"
 version = "1.0"
 
 java {
@@ -26,11 +25,10 @@ repositories {
 dependencies {
 
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:3.0.3")
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
