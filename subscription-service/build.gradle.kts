@@ -4,7 +4,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.6"
 }
 
-group = "tnews.subscription-service"
+group = "tnews:subscription-service"
 version = "1.0"
 
 java {
