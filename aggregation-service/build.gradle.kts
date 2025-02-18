@@ -4,7 +4,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.6"
 }
 
-group = "aggregator"
+group = "tnews.aggregation-service"
 version = "1.0"
 
 java {
@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-
+    implementation(project(":aggregation-client"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -37,6 +37,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5
     implementation("org.apache.httpcomponents.client5:httpclient5:5.4.1")
+
 
 }
 
