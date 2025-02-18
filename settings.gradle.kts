@@ -1,3 +1,2 @@
-includeBuild("subscription-service")
-includeBuild("aggregation-service")
-includeBuild("aggregation-client")
+rootProject.name = "tnews"
+include("subscription-service", "aggregation-service", "aggregation-client")
