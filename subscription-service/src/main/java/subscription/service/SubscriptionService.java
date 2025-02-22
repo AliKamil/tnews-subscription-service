@@ -3,7 +3,6 @@ package subscription.service;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import subscription.client.AggregatorClient;
-import subscription.dto.NewsDto;
 import subscription.entity.Category;
 import subscription.entity.KeyWord;
 import subscription.entity.Subscription;

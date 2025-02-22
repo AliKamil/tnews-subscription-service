@@ -46,6 +46,10 @@ public class NewsService {
                 newNews.setPublishedAt(story.path("timestampInTop").asText());
                 newNews.setCategory(story.path("bestRubricName").asText());
                 newsList.add(newNews);
+
+//                News newNews = objectMapper.treeToValue(story, News.class);
+//                newsList.add(newNews);
+
             }
             newsRepository.saveAll(newsList);
         } catch (JsonProcessingException e) {
