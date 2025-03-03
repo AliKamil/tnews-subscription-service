@@ -313,6 +313,7 @@ public class CommandService {
                 news.stream()
                         .flatMap(Collection::stream)
                         .map(story -> MessageFactory.createMessage(chatId, story.toString()))
+                        .limit(3)
         ).collect(Collectors.toList());
     }
 
