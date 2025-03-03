@@ -25,26 +25,21 @@ public class BotController extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        List<BotApiMethod<?>> responses = null;
         if (update.hasMessage() && update.getMessage().hasText()) {
-            List<BotApiMethod<?>> responses = commandService.get(update);
-            for (BotApiMethod<?> response : responses) {
+            responses = commandService.get(update);
+
+        } else if (update.hasCallbackQuery()) {
+            responses = commandService.handleCallbackQuery(update);
+        }
+        if (responses != null) {
+            responses.forEach(response -> {
                 try {
                     execute(response);
                 } catch (TelegramApiException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
-            }
-        } else if (update.hasCallbackQuery()) {
-            List<BotApiMethod<?>> responses = commandService.handleCallbackQuery(update);
-            if (responses != null) {
-                for (BotApiMethod<?> response : responses) {
-                    try {
-                        execute(response);
-                    } catch (TelegramApiException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+            });
         }
     }
 
