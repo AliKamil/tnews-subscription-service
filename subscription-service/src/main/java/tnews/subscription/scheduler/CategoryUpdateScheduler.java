@@ -3,7 +3,6 @@ package tnews.subscription.scheduler;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -12,7 +11,6 @@ import tnews.subscription.bot.Command;
 import tnews.subscription.controllers.BotController;
 import tnews.subscription.entity.Subscription;
 import tnews.subscription.service.CategoryService;
-import tnews.subscription.service.CommandService;
 import tnews.subscription.service.SubscriptionService;
 
 import java.time.LocalDateTime;

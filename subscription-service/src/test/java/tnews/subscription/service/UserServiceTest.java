@@ -66,6 +66,7 @@ class UserServiceTest {
                     new KeyWord(1L, "keyWord1", Set.of()),
                     new KeyWord(2L, "keyWord2", Set.of())),
                 TimeInterval.ONE_HOUR,
+                null,
                 Set.of(
                         new Category(1L, "category1", Set.of()),
                         new Category(2L, "category2", Set.of())),
