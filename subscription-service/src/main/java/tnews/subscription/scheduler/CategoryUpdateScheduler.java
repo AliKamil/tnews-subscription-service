@@ -1,6 +1,7 @@
 package tnews.subscription.scheduler;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class CategoryUpdateScheduler {
     private final CategoryService categoryService;
     private final SubscriptionService subscriptionService;
@@ -26,11 +28,14 @@ public class CategoryUpdateScheduler {
     @Scheduled(fixedRate = 86400000) // обновление категорий раз в день
     // @Scheduled(fixedRate = 10000) // 10 секунд для тестов
     public void scheduleCategoryUpdate() {
-        categoryService.updateCategories();
+        log.info("Updating categories");
+        var categories = categoryService.updateCategories();
+        log.info("Updated categories: " + categories.size());
     }
 
     @Scheduled(fixedRate = 60000) // проверка рассылок новостей раз в минуту для теста оптимально мин время рассылки
     public void sendNewsDigest() {
+        log.info("Sending news digest");
         List<Subscription> subscriptionList = subscriptionService.findAll();
 
         for (Subscription subscription : subscriptionList) {

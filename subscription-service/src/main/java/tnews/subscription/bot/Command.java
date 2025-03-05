@@ -1,5 +1,6 @@
 package tnews.subscription.bot;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -19,6 +20,7 @@ public enum Command {
     ADD_CATEGORY("/addCategory"),
     ADD_KEYWORD("/addKeyword"),
     DELETE_CATEGORY("/deleteCategory"),
+    DELETE_CATEGORY_ACTION("/deleteCategoryAction"),
     DELETE_KEYWORD("/deleteKeyword"),
     DELETE_TIME_INTERVAL("/deleteTimeInterval"),
     CANCELLATION("/cancellation"),
