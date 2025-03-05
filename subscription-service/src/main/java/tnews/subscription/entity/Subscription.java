@@ -31,6 +31,8 @@ public class Subscription {
 
     private TimeInterval timeInterval;
 
+    private LocalDateTime lastSend;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(
             name = "subscription_categories",

@@ -51,7 +51,7 @@ public class KeyboardFactory {
     public static InlineKeyboardMarkup deleteButtonsCategory(Set<Category> categories) {
         Map<String, String> buttons = new LinkedHashMap<>();
         for (Category category : categories) {
-            buttons.put(category.getCategoryName(), Command.DELETE_CATEGORY.getCom() + " " + category.getCategoryName());
+            buttons.put(category.getCategoryName(), Command.DELETE_CATEGORY_ACTION.getCom() + " " + category.getCategoryName());
         }
         buttons.put("ОТМЕНА", Command.DELETE_CATEGORY.getCom() + " " + Command.CANCELLATION.getCom());
         return createInlineKeyboard(buttons, 3);

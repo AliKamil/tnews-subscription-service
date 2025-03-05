@@ -53,7 +53,9 @@ public class NewsService {
     }
 
     public List<News> getNewsByCategory(String category) {
-        return newsRepository.findByCategory(category);
+        var news = newsRepository.findByCategory(category);
+        log.info(String.valueOf(news.size()));
+        return news;
     }
 
 

@@ -81,6 +81,7 @@ class SubscriptionServiceTest {
             1L, //TODO: id должен быть такой же как у User из-за связи OneToOne (не может быть подписки без пользователя)
             Set.of(savedKeyWord, savedKeyWord2, savedKeyWord3),
             TimeInterval.ONE_DAY,
+            null,
             Set.of(savedCategory, savedCategory2, savedCategory3),
             LocalDateTime.now(),
             LocalDateTime.now()
@@ -89,6 +90,7 @@ class SubscriptionServiceTest {
             2L,
             Set.of(),
             TimeInterval.ONE_MONTH,
+            null,
             Set.of(savedCategory),
             LocalDateTime.now(),
             LocalDateTime.now()
@@ -97,6 +99,7 @@ class SubscriptionServiceTest {
             3L,
             Set.of(savedKeyWord3, savedKeyWord),
             TimeInterval.ONE_MONTH,
+            null,
             Set.of(),
             LocalDateTime.now(),
             LocalDateTime.now()
@@ -137,6 +140,7 @@ class SubscriptionServiceTest {
         Set.of(Objects.requireNonNull(keyWordRepository.findById(keyWordId1).orElse(null)),
                 Objects.requireNonNull(keyWordRepository.findById(keyWordId2).orElse(null))),
         TimeInterval.ONE_HOUR,
+        null,
         Set.of(Objects.requireNonNull(categoryRepository.findById(categoryId1).orElse(null)),
                 Objects.requireNonNull(categoryRepository.findById(categoryId2).orElse(null))),
         LocalDateTime.now(),

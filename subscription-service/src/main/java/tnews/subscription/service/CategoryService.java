@@ -37,6 +37,8 @@ public class CategoryService {
     public List<Category> updateCategories() {
         List<String> categories = aggregatorClient.getCategories();
         for (String categoryName : categories) {
+            if (categoryName == null)
+                continue;
             save(CategoryMapper.fromString(categoryName));
         }
         return findAll();
