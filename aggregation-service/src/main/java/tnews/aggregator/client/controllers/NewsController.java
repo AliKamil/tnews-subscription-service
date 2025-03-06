@@ -31,10 +31,9 @@ public class NewsController {
     }
 
     @GetMapping("{category}")
-    public List<String> getNewsByCategory(@PathVariable("category") String category) {
+    public List<NewsDto> getNewsByCategory(@PathVariable("category") String category) {
         return newsService.getNewsByCategory(category).stream()
                 .map(NewsMapper::toDto)// может стоить написать toString просто в News?
-                .map(NewsDto::toString)
                 .toList();
     }
 

@@ -23,7 +23,6 @@ services:
       - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
 
 
-# TODO: убрал на время настройки агрегатора, чтобы быстрее запускать docker. Сам код рабочий
   subscription-service:
     build: ./subscription-service
     container_name: subscription-service
