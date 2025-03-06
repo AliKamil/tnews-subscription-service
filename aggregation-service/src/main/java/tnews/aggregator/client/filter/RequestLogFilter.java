@@ -24,5 +24,6 @@ public class RequestLogFilter extends OncePerRequestFilter {
         log.info(String.valueOf(request.getRequestURL()));
         filterChain.doFilter(request, response);
         log.info(String.valueOf(response.getStatus()));
+        log.info(response.getOutputStream().toString());
     }
 }

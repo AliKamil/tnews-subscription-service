@@ -13,4 +13,5 @@ public interface AggregatorClient {
 
     @GetMapping("{category}")
     List<NewsDto> getNewsByCategory(@PathVariable("category") String category); //может передавать строки, а не обьекты?
+
 }

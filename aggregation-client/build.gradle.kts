@@ -24,8 +24,8 @@ repositories {
 
 dependencies {
 
-    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:3.0.3")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.2.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.4")
 }
 
 tasks.withType<Test> {

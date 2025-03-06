@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class NewsScheduler {
     private final NewsService newsService;
 
-    @Scheduled(fixedRate = 10000) // обновление новостей каждые 10 минут
+    @Scheduled(fixedRate = 600000) // обновление новостей каждые 10 минут
     public void scheduleNewsFetching() {
         newsService.fetchAndSaveNews();
     }

@@ -1,6 +1,7 @@
 package tnews.subscription.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -25,6 +26,7 @@ import tnews.subscription.entity.TimeInterval;
 import tnews.subscription.entity.User;
 import tnews.subscription.entity.UserAction;
 
+@Slf4j
 @Component
 @AllArgsConstructor
 public class CommandService {
@@ -82,10 +84,10 @@ public class CommandService {
 
         Command command = null;
         try {
-            command = Command.fromString(callbackData);
+            command = Command.fromString(callbackData.split(" ")[0]);
         } catch (IllegalArgumentException e) {
-            System.out.println(command); //TODO: оставил для настройки, после нужно будет убрать
-            System.out.println(callbackData);
+           log.info(command.toString()); //TODO: оставил для настройки, после нужно будет убрать
+           log.info(callbackData);
         }
 
         if (command != null) {
@@ -109,6 +111,10 @@ public class CommandService {
                 }
                 case DELETE_CATEGORY -> {
                     return deleteCategory(chatId);
+                }
+                case DELETE_CATEGORY_ACTION -> {
+                    String categoryName = callbackData.split(" ")[1];
+                    return deleteCategoryAction(chatId, categoryName);
                 }
                 case TIME_INTERVAL,
                      UPDATE_TIME_INTERVAL -> {
@@ -268,6 +274,17 @@ public class CommandService {
         return List.of(MessageFactory.createMessage(chatId, "Выбирете категорию для удаления",
                 KeyboardFactory.deleteButtonsCategory(categories)));
     }
+
+    private List<BotApiMethod<?>> deleteCategoryAction (Long chatId, String categoryName) {
+        Subscription subscription = subscriptionService.findById(chatId);
+        Set<Category> categories = subscription.getCategories();
+        categories.remove(categoryService.findByCategoryName(categoryName));
+        subscription.setCategories(categories);
+        subscriptionService.save(subscription);
+        return List.of(MessageFactory.createMessage(chatId, "Категория удалена "  + categoryName,
+            KeyboardFactory.deleteButtonsCategory(categories)));
+    }
+
     private List<BotApiMethod<?>> addTimeInterval (Long chatId, String callbackData) {
         User user = userService.findById(chatId);
         Subscription subscription = subscriptionService.findById(chatId);
@@ -313,6 +330,7 @@ public class CommandService {
                 news.stream()
                         .flatMap(Collection::stream)
                         .map(story -> MessageFactory.createMessage(chatId, story.toString()))
+                        .limit(3)
         ).collect(Collectors.toList());
     }
 
