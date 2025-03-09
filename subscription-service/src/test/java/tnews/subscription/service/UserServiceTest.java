@@ -70,6 +70,7 @@ class UserServiceTest {
                 Set.of(
                         new Category(1L, "category1", Set.of()),
                         new Category(2L, "category2", Set.of())),
+                null,
                 LocalDateTime.now(),
                 LocalDateTime.now()),
                 LocalDateTime.now(),
