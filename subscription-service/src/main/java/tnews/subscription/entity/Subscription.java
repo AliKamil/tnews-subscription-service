@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -40,6 +41,9 @@ public class Subscription {
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     private Set<Category> categories;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<String> sentNewsIds;
 
     @CreationTimestamp
     private LocalDateTime createdTime;

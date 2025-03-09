@@ -25,8 +25,8 @@ public class KeyboardFactory {
         Map<String, String> buttons = new LinkedHashMap<>();
         buttons.put("КАТЕГОРИИ", Command.UPDATE_CATEGORY.getCom());
         buttons.put("КЛЮЧЕВЫЕ СЛОВА", Command.UPDATE_KEYWORD.getCom());
-        buttons.put("ЧАСТОТА ОБНАВЛЕНИЯ", Command.UPDATE_TIME_INTERVAL.getCom());
-        buttons.put("ОТМЕНА", Command.CANCELLATION.getCom() + " " + Management.UPDATE.getValue());
+        buttons.put("ЧАСТОТА ОБНОВЛЕНИЯ", Command.UPDATE_TIME_INTERVAL.getCom());
+        buttons.put("ОТМЕНА", Command.CANCELLATION.getCom());
         return createInlineKeyboard(buttons, 2);
     }
 
@@ -53,7 +53,7 @@ public class KeyboardFactory {
         for (Category category : categories) {
             buttons.put(category.getCategoryName(), Command.DELETE_CATEGORY_ACTION.getCom() + " " + category.getCategoryName());
         }
-        buttons.put("ОТМЕНА", Command.DELETE_CATEGORY.getCom() + " " + Command.CANCELLATION.getCom());
+        buttons.put("ОТМЕНА", Command.UPDATE.getCom());
         return createInlineKeyboard(buttons, 3);
 
     }
@@ -71,7 +71,7 @@ public class KeyboardFactory {
         Map<String, String> buttons = new LinkedHashMap<>();
         buttons.put("ДОБАВИТЬ", Command.ADD_CATEGORY.getCom());
         buttons.put("УДАЛИТЬ", Command.DELETE_CATEGORY.getCom());
-        buttons.put("ОТМЕНА", Command.CANCELLATION.getCom());
+        buttons.put("ОТМЕНА", Command.UPDATE.getCom());
         return createInlineKeyboard(buttons, 2);
     }
 
@@ -110,14 +110,14 @@ public class KeyboardFactory {
     public static InlineKeyboardMarkup deleteSubscription() {
         Map<String, String> buttons = new LinkedHashMap<>();
         buttons.put("ДА", Command.DELETE.getCom());
-        buttons.put("НЕТ", Command.EXIT.getCom());
+        buttons.put("НЕТ", Command.CANCELLATION.getCom());
         return createInlineKeyboard(buttons, 2);
     }
 
     public static InlineKeyboardMarkup chooseUpdateSubscription() {
         Map<String, String> buttons = new LinkedHashMap<>();
         buttons.put("ДА", Command.UPDATE.getCom());
-        buttons.put("НЕТ", Command.EXIT.getCom());
+        buttons.put("НЕТ", Command.CANCELLATION.getCom());
         return createInlineKeyboard(buttons, 2);
     }
 
