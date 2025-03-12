@@ -1,0 +1,52 @@
+name: DigitalOcean App workflow
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  REGISTRY: "registry.digitalocean.com/tnews-registry"
+  IMAGE_NAME_AGGREGATOR: "tnews-aggregator"
+  IMAGE_NAME_SUBSCRIPTION: "tnews-subscription"
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v2
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle
+
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle Wrapper
+        run: ./gradlew build
+
+      - name: Build docker image for aggregator service
+        run: docker build ./aggregation-service -t $(echo $REGISTRY)/$(echo $IMAGE_NAME_AGGREGATOR):$(echo $GITHUB_SHA | head -c7)
+
+      - name: Build docker image for subscription service
+        run: docker build ./subscription-service -t $(echo $REGISTRY)/$(echo $IMAGE_NAME_SUBSCRIPTION):$(echo $GITHUB_SHA | head -c7)
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_TOKEN }}
+
+      - name: Log in to DigitalOcean Container Registry with short-lived credentials
+        run: doctl registry login --expiry-seconds 600
+
+      - name: Push image to DigitalOcean Container Registry
+        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME_AGGREGATOR):$(echo $GITHUB_SHA | head -c7)
+
+      - name: Push image of subscription service to DigitalOcean Container Registry
+        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME_SUBSCRIPTION):$(echo $GITHUB_SHA | head -c7)
