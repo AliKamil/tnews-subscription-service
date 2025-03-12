@@ -83,6 +83,7 @@ class SubscriptionServiceTest {
             TimeInterval.ONE_DAY,
             null,
             Set.of(savedCategory, savedCategory2, savedCategory3),
+            null,
             LocalDateTime.now(),
             LocalDateTime.now()
     );
@@ -92,6 +93,7 @@ class SubscriptionServiceTest {
             TimeInterval.ONE_MONTH,
             null,
             Set.of(savedCategory),
+            null,
             LocalDateTime.now(),
             LocalDateTime.now()
     );
@@ -101,6 +103,7 @@ class SubscriptionServiceTest {
             TimeInterval.ONE_MONTH,
             null,
             Set.of(),
+            null,
             LocalDateTime.now(),
             LocalDateTime.now()
     );
@@ -143,6 +146,7 @@ class SubscriptionServiceTest {
         null,
         Set.of(Objects.requireNonNull(categoryRepository.findById(categoryId1).orElse(null)),
                 Objects.requireNonNull(categoryRepository.findById(categoryId2).orElse(null))),
+        null,
         LocalDateTime.now(),
         LocalDateTime.now()
     );
