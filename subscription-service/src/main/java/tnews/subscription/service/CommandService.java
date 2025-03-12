@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -13,10 +14,8 @@ import tnews.subscription.bot.Command;
 import tnews.subscription.bot.KeyboardFactory;
 import tnews.subscription.bot.Management;
 import tnews.subscription.bot.MessageFactory;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import tnews.subscription.entity.Category;
@@ -43,7 +42,7 @@ public class CommandService {
 
         if(message.isCommand()) {
             if (Command.START.getCom().equals(text)) { //TODO: стоит заменить на switch, если добавим меню. Так как там только "команды" (начитаются со /). Просто дублирование методов из handleCallbackQuery
-                return start(chatId, message.getFrom().getFirstName());
+                return start(chatId, message.getFrom().getFirstName(), message.getMessageId());
             }
         }
 
@@ -59,13 +58,13 @@ public class CommandService {
         if (management != null) {
             switch (management) {
                 case ADD -> {
-                    return addSubscription(chatId, user);
+                    return addSubscription(chatId, user, message.getMessageId());
                 }
                 case UPDATE -> {
                     return updateSubscription(chatId, user);
                 }
                 case DELETE -> {
-                    return exactlyDeleteSubscription(chatId);
+                    return exactlyDeleteSubscription(chatId, message.getMessageId());
                 }
             }
         }
@@ -81,71 +80,76 @@ public class CommandService {
         CallbackQuery callbackQuery = update.getCallbackQuery();
         String callbackData = callbackQuery.getData();
         Long chatId = callbackQuery.getMessage().getChatId();
-
+        Integer messageId = callbackQuery.getMessage().getMessageId();
         Command command = null;
         try {
             command = Command.fromString(callbackData.split(" ")[0]);
+            log.info(command.getCom());
         } catch (IllegalArgumentException e) {
-           log.info(command.toString()); //TODO: оставил для настройки, после нужно будет убрать
            log.info(callbackData);
         }
 
         if (command != null) {
             switch (command) {
-                case CATEGORY -> {
-                    List<Category> categories = categoryService.findAll(); // стоит ли переписать на Set?
-                    return List.of(MessageFactory.createMessage(chatId, "Выберите нужную категорию: ",
-                            KeyboardFactory.categoriesButtons(categories)));
+                case CATEGORY,
+                     ADD_CATEGORY -> {
+                    List<Category> categories = categoryService.findAll();
+                    return choosingCategories(chatId, messageId, categories);
                 }
                 case KEYWORD -> {
-                    return addKeyWord(chatId);
+                    return addKeyWord(chatId, messageId);
                 }
                 case UPDATE_KEYWORD -> {
-                    return updateKeyWord(chatId);
+                    return updateKeyWord(chatId, messageId);
                 }
                 case DELETE_KEYWORD -> {
-                    return deleteKeyWord(chatId);
+                    return deleteKeyWord(chatId, messageId);
                 }
                 case UPDATE_CATEGORY -> {
-                    return updateCategory(chatId);
+                    return updateCategory(chatId, messageId);
                 }
                 case DELETE_CATEGORY -> {
-                    return deleteCategory(chatId);
+                    return deleteCategory(chatId, messageId);
                 }
                 case DELETE_CATEGORY_ACTION -> {
-                    String categoryName = callbackData.split(" ")[1];
-                    return deleteCategoryAction(chatId, categoryName);
+                    String categoryName = Arrays.stream(callbackData.split(" "))
+                            .skip(1)
+                            .collect(Collectors.joining(" "));
+                    return deleteCategoryAction(chatId, categoryName, messageId);
                 }
                 case TIME_INTERVAL,
                      UPDATE_TIME_INTERVAL -> {
-                    return chooseTimeInterval(chatId);
+                    return chooseTimeInterval(chatId, messageId);
                 }
-
                 case EXIT -> {
                     return exit(chatId);
                 }
                 case DELETE -> {
-                    return deleteSubscription(chatId);
+                    return deleteSubscription(chatId, messageId);
                 }
                 case UPDATE -> {
-                    return updateSubscription(chatId);
+                    return updateSubscription(chatId, messageId);
                 }
                 case START -> {
-                    return start(chatId, callbackQuery.getFrom().getFirstName());
+                    return start(chatId, callbackQuery.getFrom().getFirstName(), messageId);
                 }
-
+                case CANCELLATION -> {
+                    return cancellation(chatId, messageId);
+                }
             }
         }
         if (TimeInterval.isEmun(callbackData)) {
-            return addTimeInterval(chatId, callbackData);
+            log.info("Update time interval is emun");
+            log.info(callbackData);
+            return addTimeInterval(chatId, callbackData, messageId);
         }
         if (categoryService.findByCategoryName(callbackData) != null) {
-            return addCategory(chatId, callbackData);
+            return addCategory(chatId, callbackData, messageId);
         }
         return List.of(MessageFactory.createMessage(chatId, "Неизвестная команда"));
     }
 
-    private List<BotApiMethod<?>> addSubscription (Long chatId, User user) {
+    private List<BotApiMethod<?>> addSubscription (Long chatId, User user, Integer messageId) {
         if (user.getSubscription() != null) {
             return List.of(
                     MessageFactory.createMessage(chatId, "Подписка уже создана",
@@ -154,7 +158,7 @@ public class CommandService {
                             KeyboardFactory.chooseUpdateSubscription())
                     );
         }
-        return start(chatId, user.getUsername());
+        return start(chatId, user.getUsername(), messageId);
     }
 
     private List<BotApiMethod<?>> updateSubscription (Long chatId, User user) {
@@ -166,52 +170,70 @@ public class CommandService {
         userService.updateCurrentAction(chatId, UserAction.UPDATE.name());
         return List.of(
                 MessageFactory.createMessage(chatId, "Что обновить?",
-                        KeyboardFactory.updateButtonsCategoryAndKeyword()));
+                        KeyboardFactory.updateButtonsCategoryAndKeyword())
+        );
     }
 
-    private List<BotApiMethod<?>> updateSubscription (Long chatId) {
+    private List<BotApiMethod<?>> updateSubscription (Long chatId, Integer messageId) {
         User user = userService.findById(chatId);
         if (user.getSubscription() == null) {
-            return List.of(
-                    MessageFactory.createMessage(chatId, "Для начала необходимо создать подписку",
-                            KeyboardFactory.createSubscription()));
+            return MessageFactory.createMessage(chatId, "Для начала необходимо создать подписку",
+                            KeyboardFactory.createSubscription(), messageId);
         }
         userService.updateCurrentAction(chatId, UserAction.UPDATE.name());
-        return List.of(MessageFactory.createMessage(chatId, "Что обновить?",
-                        KeyboardFactory.updateButtonsCategoryAndKeyword()));
+        return MessageFactory.createMessage(chatId, "Что обновить?",
+                        KeyboardFactory.updateButtonsCategoryAndKeyword(), messageId);
     }
 
-    private List<BotApiMethod<?>> exactlyDeleteSubscription(Long chatId) {
-        return List.of(MessageFactory.createMessage(chatId, "Вы точно хотите удалить подписку?",
-                KeyboardFactory.deleteSubscription()));
+    private List<BotApiMethod<?>> exactlyDeleteSubscription(Long chatId, Integer messageId) {
+        return MessageFactory.createMessage(chatId, "Вы точно хотите удалить подписку?",
+                KeyboardFactory.deleteSubscription(), messageId);
     }
-    private List<BotApiMethod<?>> deleteSubscription (Long chatId) {
+    private List<BotApiMethod<?>> deleteSubscription (Long chatId, Integer messageId) {
         User user = userService.findById(chatId);
         if (user.getSubscription() == null) {
-            return List.of(MessageFactory.createMessage(chatId, "Подписка еще не создана",
-                    KeyboardFactory.keyboardMarkup(null)));
+            return MessageFactory.createMessage(chatId, "Подписка еще не создана",
+                    KeyboardFactory.keyboardMarkup(null), messageId);
         }
         subscriptionService.deleteById(chatId);
         return List.of(
                 MessageFactory.createMessage(chatId, "Подписка удалена"),
                 MessageFactory.createMessage(chatId, "\uD83D\uDE22",
-                        KeyboardFactory.keyboardMarkup(null))
+                        KeyboardFactory.keyboardMarkup(null)),
+                DeleteMessage.builder()
+                        .chatId(chatId)
+                        .messageId(messageId)
+                        .build()
         );
     }
 
-    private List<BotApiMethod<?>> start (Long chatId, String firstName) {
+    private List<BotApiMethod<?>> cancellation (Long chatId, Integer messageId) {
+        log.info("Delete message {}", messageId);
+        return List.of(
+                DeleteMessage.builder()
+                        .chatId(chatId)
+                        .messageId(messageId)
+                        .build()
+        );
+    }
+
+    private List<BotApiMethod<?>> start (Long chatId, String firstName, Integer messageId) {
         User user = new User();
         user.setId(chatId);
         user.setUsername(firstName);
-        user.setCurrentAction(UserAction.READY);
+        user.setCurrentAction(UserAction.START);
         userService.create(user);
-        SendMessage firstMessage = MessageFactory.createMessage(chatId,
-                "Привет, " + firstName + "! Я новостной бот. Рад тебя видеть!");
-        SendMessage secondMessage = MessageFactory.createMessage(chatId,
-                "Как будем искать новости? (можно выбрать и категории и ключевые слова)",
-                KeyboardFactory.startButtons());
-        return List.of(firstMessage, secondMessage);
+        return List.of(
+          MessageFactory.createMessage(chatId, "Привет, " + firstName + "! Я новостной бот. Рад тебя видеть!"),
+          MessageFactory.createMessage(chatId, "Как будем искать новости? (можно выбрать и категории и ключевые слова)",
+                KeyboardFactory.startButtons()),
+          DeleteMessage.builder()
+                  .chatId(chatId)
+                  .messageId(messageId)
+                  .build()
+        );
     }
+
     private List<BotApiMethod<?>> createKeyword (Long chatId, String keyword) {
         User updateUser = userService.addKeyword(chatId, keyword);
         if (updateUser == null) {
@@ -222,11 +244,12 @@ public class CommandService {
                 KeyboardFactory.settingMenu()));
     }
 
-    private List<BotApiMethod<?>> addKeyWord (Long chatId) {
+    private List<BotApiMethod<?>> addKeyWord (Long chatId, Integer messageId) {
         userService.updateCurrentAction(chatId, UserAction.WAITING_FOR_KEYWORD.name());
-        return List.of(MessageFactory.createMessage(chatId, "Введите одно ключевое слово: "));
+        return MessageFactory.createMessage(chatId, "Введите одно ключевое слово: ", messageId);
     }
-    private List<BotApiMethod<?>> updateKeyWord (Long chatId) {
+
+    private List<BotApiMethod<?>> updateKeyWord (Long chatId, Integer messageId) {
         Subscription subscription = subscriptionService.findById(chatId);
         Set<KeyWord> keyWords = subscription.getKeyWords();
         List<String> keyWordsList = new ArrayList<>();
@@ -237,78 +260,92 @@ public class CommandService {
           MessageFactory.createMessage(chatId, "Ваши ключевые слова:"),
           MessageFactory.createMessage(chatId, keyWordsList.toString()),
           MessageFactory.createMessage(chatId, "С чего начнем?",
-                  KeyboardFactory.updateKeyWord())
+                  KeyboardFactory.updateKeyWord()),
+          DeleteMessage.builder()
+                  .chatId(chatId)
+                  .messageId(messageId)
+                  .build()
         );
     }
-    private List<BotApiMethod<?>> deleteKeyWord (Long chatId) {
+
+    private List<BotApiMethod<?>> deleteKeyWord (Long chatId, Integer messageId) {
         Subscription subscription = subscriptionService.findById(chatId);
         Set<KeyWord> keyWords = subscription.getKeyWords();
-        return List.of(MessageFactory.createMessage(chatId, "Выбирете ключевое слово для удаления",
-                KeyboardFactory.deleteButtonKeyWord(keyWords)));
+        return MessageFactory.createMessage(chatId, "Выбирете ключевое слово для удаления",
+                KeyboardFactory.deleteButtonKeyWord(keyWords), messageId);
     }
 
-    private List<BotApiMethod<?>> addCategory (Long chatId, String callbackData) {
+    private List<BotApiMethod<?>> choosingCategories (Long chatId, Integer messageId, List<Category> categories) {
+        return MessageFactory.createMessage(chatId, "Выберите нужную категорию: ",
+                KeyboardFactory.categoriesButtons(categories), messageId);
+    }
+
+    private List<BotApiMethod<?>> addCategory (Long chatId, String callbackData, Integer messageId) {
         User updateUser = userService.addCategory(chatId, callbackData);
         if (updateUser == null) {
-            return List.of(MessageFactory.createMessage(chatId, "Пользователь не найден :("));
+            return MessageFactory.createMessage(chatId, "Пользователь не найден :(", messageId);
         }
-        return List.of(MessageFactory.createMessage(chatId, "Категория добавлена",
-                KeyboardFactory.settingMenu()));
+        return MessageFactory.createMessage(chatId, "Категория добавлена",
+                KeyboardFactory.settingMenu(), messageId);
     }
-    private List<BotApiMethod<?>> updateCategory (Long chatId) {
+    private List<BotApiMethod<?>> updateCategory (Long chatId, Integer messageId) {
         Subscription subscription = subscriptionService.findById(chatId);
         Set<Category> categories = subscription.getCategories();
-        List<BotApiMethod<?>> outMsg = new ArrayList<>();
-        List<String> categoryNames = new ArrayList<>();
-        outMsg.add(MessageFactory.createMessage(chatId, "Ваши категории: "));
-        for (Category category : categories) {
-            categoryNames.add(category.getCategoryName());
-        }
-        outMsg.add(MessageFactory.createMessage(chatId, categoryNames.toString()));
-        outMsg.add(MessageFactory.createMessage(chatId, "С чего начнем?", KeyboardFactory.updateCategory()));
-        return outMsg;
+        return List.of(
+                MessageFactory.createMessage(chatId, "Ваши категории: "),
+                MessageFactory.createMessage(chatId, categories.stream()
+                        .map(Category::getCategoryName)
+                        .collect(Collectors.joining(", "))),
+                MessageFactory.createMessage(chatId, "С чего начнем?", KeyboardFactory.updateCategory()),
+                DeleteMessage.builder()
+                        .chatId(chatId)
+                        .messageId(messageId)
+                        .build()
+        );
+
     }
-    private List<BotApiMethod<?>> deleteCategory (Long chatId) {
+    private List<BotApiMethod<?>> deleteCategory (Long chatId, Integer messageId) {
         Subscription subscription = subscriptionService.findById(chatId);
         Set<Category> categories = subscription.getCategories();
-        return List.of(MessageFactory.createMessage(chatId, "Выбирете категорию для удаления",
-                KeyboardFactory.deleteButtonsCategory(categories)));
+        return MessageFactory.createMessage(chatId, "Выбирете категорию для удаления",
+                KeyboardFactory.deleteButtonsCategory(categories), messageId);
     }
 
-    private List<BotApiMethod<?>> deleteCategoryAction (Long chatId, String categoryName) {
+    private List<BotApiMethod<?>> deleteCategoryAction (Long chatId, String categoryName, Integer messageId) {
         Subscription subscription = subscriptionService.findById(chatId);
         Set<Category> categories = subscription.getCategories();
         categories.remove(categoryService.findByCategoryName(categoryName));
         subscription.setCategories(categories);
         subscriptionService.save(subscription);
-        return List.of(MessageFactory.createMessage(chatId, "Категория удалена "  + categoryName,
-            KeyboardFactory.deleteButtonsCategory(categories)));
+        return MessageFactory.createMessage(chatId, "Категория удалена "  + categoryName,
+            KeyboardFactory.deleteButtonsCategory(categories), messageId);
     }
 
-    private List<BotApiMethod<?>> addTimeInterval (Long chatId, String callbackData) {
+    private List<BotApiMethod<?>> addTimeInterval (Long chatId, String callbackData, Integer messageId) {
         User user = userService.findById(chatId);
         Subscription subscription = subscriptionService.findById(chatId);
         subscription.setTimeInterval(TimeInterval.valueOf(callbackData));
         subscriptionService.save(subscription);
         switch (user.getCurrentAction()) {
-            case READY -> {
-                return List.of(MessageFactory.createMessage(chatId, "Временной интервал успешно добавлен",
-                        KeyboardFactory.settingMenu()));
+            case READY,
+                 START -> {
+                return MessageFactory.createMessage(chatId, "Временной интервал успешно добавлен",
+                        KeyboardFactory.settingMenu(), messageId);
             }
             case UPDATE -> {
-                return List.of(MessageFactory.createMessage(chatId, "Временной интервал обнавлен",
-                        KeyboardFactory.updateMenu()));
+                return MessageFactory.createMessage(chatId, "Временной интервал обнавлен",
+                        KeyboardFactory.updateMenu(), messageId);
             }
             default -> {
-                return List.of(MessageFactory.createMessage(chatId, "Неизвестная команда"));
+                return MessageFactory.createMessage(chatId, "Неизвестная команда", messageId);
             }
         }
 
     }
 
-    private List<BotApiMethod<?>> chooseTimeInterval (Long chatId) {
-        return List.of(MessageFactory.createMessage(chatId, "Как часто хотите получать новости?",
-                KeyboardFactory.setTimeInterval()));
+    private List<BotApiMethod<?>> chooseTimeInterval (Long chatId, Integer messageId) {
+        return MessageFactory.createMessage(chatId, "Как часто хотите получать новости?",
+                KeyboardFactory.setTimeInterval(), messageId);
     }
 
     private List<BotApiMethod<?>> exit (Long chatId) {
@@ -316,21 +353,33 @@ public class CommandService {
         if (subscription.getTimeInterval() == null) {
             return List.of(
                     MessageFactory.createMessage(chatId, "Настройка не закончена"),
-                    MessageFactory.createMessage(chatId, "Установите частоту обновления новостей"
-                            , KeyboardFactory.setTimeInterval()));
+                    MessageFactory.createMessage(chatId, "Установите частоту обновления новостей",
+                            KeyboardFactory.setTimeInterval()));
         }
         userService.updateCurrentAction(chatId, UserAction.READY.name());
         Set<String> categories = subscription.getCategories().stream()
                 .map(Category::getCategoryName)
                 .collect(Collectors.toSet());
-        List<List<NewsDto>> news = subscriptionService.getNewsByCategories(categories);
+        List<List<NewsDto>> allNews = subscriptionService.getNewsByCategories(categories);
+
+        Set<String> sendNews = subscription.getSentNewsIds();
+
+        List<NewsDto> newNews = allNews.stream()
+                .flatMap(Collection::stream)
+                .filter(news -> !sendNews.contains(news.getId()))
+                .limit(3)
+                .toList();
+
+        sendNews.addAll(newNews.stream()
+                .map(NewsDto::getId)
+                .toList());
+        subscription.setSentNewsIds(sendNews);
+        subscriptionService.save(subscription);
 
         return Stream.concat(
-                Stream.of(MessageFactory.createMessage(chatId, "Тут должны появиться первые новости")),
-                news.stream()
-                        .flatMap(Collection::stream)
-                        .map(story -> MessageFactory.createMessage(chatId, story.toString()))
-                        .limit(3)
+                Stream.of(MessageFactory.createMessage(chatId, "Свежие новости")),
+                newNews.stream()
+                        .map(news -> MessageFactory.createMessage(chatId, news.toString()))
         ).collect(Collectors.toList());
     }
 
