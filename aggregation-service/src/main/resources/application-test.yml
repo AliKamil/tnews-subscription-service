@@ -1,8 +1,4 @@
 spring:
   data:
     mongodb:
-      username: user
-      password: password
-      host: localhost
-      port: 27017
-      database: newsdb
+      uri: mongodb://localhost:27017/test

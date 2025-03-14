@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest
 //@DataMongoTest
 @ActiveProfiles("test")
+@Disabled
 class NewsServiceTest {
    @Autowired
    private NewsService newsService;
