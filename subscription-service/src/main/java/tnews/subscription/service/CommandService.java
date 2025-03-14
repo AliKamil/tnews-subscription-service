@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -135,6 +134,9 @@ public class CommandService {
                 }
                 case CANCELLATION -> {
                     return cancellation(chatId, messageId);
+                }
+                case MORE -> {
+                    return moreNews(chatId, messageId);
                 }
             }
         }
@@ -337,7 +339,7 @@ public class CommandService {
                         KeyboardFactory.updateMenu(), messageId);
             }
             default -> {
-                return MessageFactory.createMessage(chatId, "Неизвестная команда", messageId);
+                return List.of(MessageFactory.createMessage(chatId, "Неизвестная команда"));
             }
         }
 
@@ -356,20 +358,12 @@ public class CommandService {
                     MessageFactory.createMessage(chatId, "Установите частоту обновления новостей",
                             KeyboardFactory.setTimeInterval()));
         }
-        userService.updateCurrentAction(chatId, UserAction.READY.name());
-        Set<String> categories = subscription.getCategories().stream()
-                .map(Category::getCategoryName)
-                .collect(Collectors.toSet());
-        List<List<NewsDto>> allNews = subscriptionService.getNewsByCategories(categories);
+        Set<String> sendNews = new HashSet<>();
 
-        Set<String> sendNews = subscription.getSentNewsIds();
-
-        List<NewsDto> newNews = allNews.stream()
-                .flatMap(Collection::stream)
-                .filter(news -> !sendNews.contains(news.getId()))
-                .limit(3)
-                .toList();
-
+        List<NewsDto> newNews = userService.findActualNews(chatId);
+        if (newNews.isEmpty()) {
+            return List.of();
+        }
         sendNews.addAll(newNews.stream()
                 .map(NewsDto::getId)
                 .toList());
@@ -377,9 +371,32 @@ public class CommandService {
         subscriptionService.save(subscription);
 
         return Stream.concat(
-                Stream.of(MessageFactory.createMessage(chatId, "Свежие новости")),
+                Stream.concat(
+                    Stream.of(MessageFactory.createMessage(chatId, "Свежие новости")),
+                    newNews.stream()
+                            .map(news -> MessageFactory.createMessage(chatId, news.toString()))),
+                Stream.of(MessageFactory.createMessage(chatId, "Делее", KeyboardFactory.moreNews()))
+        ).collect(Collectors.toList());
+    }
+
+    private List<BotApiMethod<?>> moreNews(Long chatId, Integer messageId) {
+        Subscription subscription = subscriptionService.findById(chatId);
+        if (subscription == null) {
+            return List.of(
+                    MessageFactory.createMessage(chatId, "Пользователь не найден"),
+                    MessageFactory.createMessage(chatId, "Создать подписку?",
+                            KeyboardFactory.createSubscription())
+            );
+        }
+        List<NewsDto> newNews = userService.findActualNews(chatId);
+        if (newNews.isEmpty()) {
+            return MessageFactory.createMessage(chatId,
+                    "Свежих новостей пока нет :( Как появятся что-то новое - уведомим вас", messageId);
+        }
+        return Stream.concat(
                 newNews.stream()
-                        .map(news -> MessageFactory.createMessage(chatId, news.toString()))
+                        .map(news -> MessageFactory.createMessage(chatId, news.toString())),
+                MessageFactory.createMessage(chatId,"Далее", KeyboardFactory.moreNews(), messageId).stream()
         ).collect(Collectors.toList());
     }
 
