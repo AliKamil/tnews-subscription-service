@@ -37,7 +37,7 @@ public class CategoryUpdateScheduler {
         log.info("Updated categories: " + categories.size());
     }
 
-    @Scheduled(fixedRate = 60000) // проверка рассылок новостей раз в минуту для теста оптимально мин время рассылки
+    @Scheduled(fixedRate = 600000) // проверка рассылок новостей раз в минуту для теста оптимально мин время рассылки
     public void sendNewsDigest() {
         log.info("Sending news digest");
         List<Subscription> subscriptionList = subscriptionService.findAll();
@@ -61,7 +61,7 @@ public class CategoryUpdateScheduler {
         log.info("Checking if last sent is: {}", lastSent);
 
         boolean tmp = switch (subscription.getTimeInterval()) {
-            case ONE_HOUR -> lastSent == null || lastSent.plusMinutes(1).isBefore(now); //TODO: пока раз минуту, должно быть раз в час
+            case ONE_HOUR -> lastSent == null || lastSent.plusHours(1).isBefore(now); //TODO: пока раз минуту, должно быть раз в час
             case ONE_DAY ->  lastSent == null || lastSent.plusDays(1).isBefore(now);
             case ONE_WEEK -> lastSent == null || lastSent.plusWeeks(1).isBefore(now);
             case ONE_MONTH -> lastSent == null || lastSent.plusMonths(1).isBefore(now);
