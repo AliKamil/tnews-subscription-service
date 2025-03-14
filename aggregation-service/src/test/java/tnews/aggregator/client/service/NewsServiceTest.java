@@ -1,6 +1,7 @@
 package tnews.aggregator.client.service;
 
 import org.junit.jupiter.api.Disabled;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import tnews.aggregator.client.repository.NewsRepository;
 import tnews.aggregator.client.entity.News;
 import org.junit.jupiter.api.Test;
@@ -8,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-@Disabled
+@DataMongoTest
 class NewsServiceTest {
    @Autowired
    private NewsService newsService;

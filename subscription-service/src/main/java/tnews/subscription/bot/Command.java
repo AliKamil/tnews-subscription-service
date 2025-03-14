@@ -14,6 +14,7 @@ public enum Command {
     CATEGORY("/category"),
     KEYWORD("/keyWord"),
     TIME_INTERVAL("/timeInterval"),
+    MORE("/more"),
     UPDATE_KEYWORD("/updateKeyword"),
     UPDATE_CATEGORY("/updateCategory"),
     UPDATE_TIME_INTERVAL("/updateTimeInterval"),
