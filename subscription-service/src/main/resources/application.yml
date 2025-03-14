@@ -24,7 +24,7 @@ spring:
 
 bot:
   name: tnewsSubscriptionBot
-  token: 7367963001:AAEKCLGL8Wryxq8AW5E3QlzvHHMK_Iirnjk # 8128984956:AAHhuxvs5fGkLYnXT3dhbN7uHsiIF9LiHS0
+  token: 8128984956:AAHhuxvs5fGkLYnXT3dhbN7uHsiIF9LiHS0
 
 aggregator:
   service:
