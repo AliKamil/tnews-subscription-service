@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import tnews.aggregator.client.AggregatorClient;
 import tnews.aggregator.client.dto.NewsDto;
+import tnews.aggregator.client.dto.NewsRequestDto;
 import tnews.subscription.entity.Category;
 import tnews.subscription.entity.KeyWord;
 import tnews.subscription.entity.Subscription;
@@ -12,6 +13,7 @@ import tnews.subscription.repository.SubscriptionRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -76,5 +78,24 @@ public class SubscriptionService {
         }
         return news;
     }
+
+    public List<NewsDto> getActualNews(Long id, int limit) {
+        Subscription subscription = findById(id);
+        Set<String> categories = subscription.getCategories().stream()
+                .map(Category::getCategoryName)
+                .collect(Collectors.toSet());
+        Set<String> sentNewsIds = subscription.getSentNewsIds();
+        List<NewsDto> actualNews = aggregatorClient.getActualNews(new NewsRequestDto(categories, sentNewsIds, limit));
+
+        actualNews.stream()
+                .map(NewsDto::getId)
+                .forEach(sentNewsIds::add);
+
+        subscription.setSentNewsIds(sentNewsIds);
+        subscriptionRepository.save(subscription);
+
+        return actualNews;
+    }
+
 
 }

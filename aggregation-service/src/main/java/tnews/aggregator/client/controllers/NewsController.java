@@ -1,13 +1,11 @@
 package tnews.aggregator.client.controllers;
 
+import org.springframework.web.bind.annotation.*;
+import tnews.aggregator.client.dto.NewsRequestDto;
 import tnews.aggregator.client.service.NewsService;
 import tnews.aggregator.client.dto.NewsDto;
 import tnews.aggregator.client.mapper.NewsMapper;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -33,10 +31,15 @@ public class NewsController {
     @GetMapping("{category}")
     public List<NewsDto> getNewsByCategory(@PathVariable("category") String category) {
         return newsService.getNewsByCategory(category).stream()
-                .map(NewsMapper::toDto)// может стоить написать toString просто в News?
+                .map(NewsMapper::toDto)
                 .toList();
     }
 
-
+    @PostMapping("/actual")
+    public List<NewsDto> getActualNews(@RequestBody NewsRequestDto request) {
+        return newsService.findActualNews(request.getCategories(), request.getSendNewsIds(), request.getLimit()).stream()
+                .map(NewsMapper::toDto)
+                .toList();
+    }
 
 }

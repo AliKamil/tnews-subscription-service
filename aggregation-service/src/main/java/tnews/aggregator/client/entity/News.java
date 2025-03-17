@@ -19,6 +19,7 @@ public class News {
     @JsonProperty("annotation")
     private String content;
     private String url;
+    @JsonProperty("timestampInTop")
     private String publishedAt;
     @Indexed
     @JsonProperty("bestRubricName")
