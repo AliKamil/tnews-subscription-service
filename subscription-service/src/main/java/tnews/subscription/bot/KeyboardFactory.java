@@ -121,6 +121,12 @@ public class KeyboardFactory {
         return createInlineKeyboard(buttons, 2);
     }
 
+    public static InlineKeyboardMarkup moreNews() {
+        Map<String, String> buttons = new LinkedHashMap<>();
+        buttons.put("...", Command.MORE.getCom());
+        return createInlineKeyboard(buttons, 1);
+    }
+
     private static ReplyKeyboardMarkup replyKeyboardMarkup() {
         List<String> buttons = new ArrayList<>();
         buttons.add(Management.ADD.getValue());

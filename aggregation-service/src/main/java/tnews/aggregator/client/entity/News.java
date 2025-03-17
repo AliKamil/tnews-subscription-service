@@ -1,12 +1,16 @@
 package tnews.aggregator.client.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Document(collection = "news")
 public class News {
     @Id
@@ -15,6 +19,7 @@ public class News {
     @JsonProperty("annotation")
     private String content;
     private String url;
+    @JsonProperty("timestampInTop")
     private String publishedAt;
     @Indexed
     @JsonProperty("bestRubricName")
