@@ -79,27 +79,27 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public List<NewsDto> findActualNews(Long id) {
-        updateCurrentAction(id, UserAction.READY.name());
-        Subscription subscription = subscriptionService.findById(id);
-        Set<String> categories = subscription.getCategories().stream()
-                .map(Category::getCategoryName)
-                .collect(Collectors.toSet());
-        List<List<NewsDto>> allNews = subscriptionService.getNewsByCategories(categories);
-        Set<String> sendNews = subscription.getSentNewsIds();
-
-
-        List<NewsDto> newNews = allNews.stream()
-                .flatMap(Collection::stream)
-                .filter(news -> !sendNews.contains(news.getId()))
-                .limit(3)
-                .toList();
-        sendNews.addAll(newNews.stream()
-                .map(NewsDto::getId)
-                .toList());
-        subscription.setSentNewsIds(sendNews);
-        subscriptionService.save(subscription);
-        return newNews;
-    }
+//    public List<NewsDto> findActualNews(Long id) {
+//        updateCurrentAction(id, UserAction.READY.name());
+//        Subscription subscription = subscriptionService.findById(id);
+//        Set<String> categories = subscription.getCategories().stream()
+//                .map(Category::getCategoryName)
+//                .collect(Collectors.toSet());
+//        List<List<NewsDto>> allNews = subscriptionService.getNewsByCategories(categories);
+//        Set<String> sendNews = subscription.getSentNewsIds();
+//
+//
+//        List<NewsDto> newNews = allNews.stream()
+//                .flatMap(Collection::stream)
+//                .filter(news -> !sendNews.contains(news.getId()))
+//                .limit(3)
+//                .toList();
+//        sendNews.addAll(newNews.stream()
+//                .map(NewsDto::getId)
+//                .toList());
+//        subscription.setSentNewsIds(sendNews);
+//        subscriptionService.save(subscription);
+//        return newNews;
+//    }
 
 }
