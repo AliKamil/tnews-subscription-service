@@ -1,6 +1,7 @@
 package tnews.subscription.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import tnews.aggregator.client.AggregatorClient;
 import tnews.aggregator.client.dto.NewsDto;
@@ -10,16 +11,16 @@ import tnews.subscription.entity.KeyWord;
 import tnews.subscription.entity.Subscription;
 import tnews.subscription.repository.SubscriptionRepository;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class SubscriptionService {
     private SubscriptionRepository subscriptionRepository;
-    private CategoryService categoryService;
     private AggregatorClient aggregatorClient;
 
     public List<Subscription> findAll() {
@@ -67,18 +68,6 @@ public class SubscriptionService {
         subscriptionRepository.deleteById(id);
     }
 
-    public List<NewsDto> getNewsByCategory(String category) { // скорее всего лишнее
-        return aggregatorClient.getNewsByCategory(category);
-    }
-
-    public List<List<NewsDto>> getNewsByCategories(Set<String> categories) {
-        List<List<NewsDto>> news = new ArrayList<>();
-        for (String category : categories) {
-            news.add(aggregatorClient.getNewsByCategory(category));
-        }
-        return news;
-    }
-
     public List<NewsDto> getActualNews(Long id, int limit) {
         Subscription subscription = findById(id);
         Set<String> categories = subscription.getCategories().stream()
@@ -97,5 +86,15 @@ public class SubscriptionService {
         return actualNews;
     }
 
-
+    public List<Subscription> findNewsToValidSubscriptions() {
+        List<Subscription> subscriptionList = subscriptionRepository.findValidSubscriptions();
+        if (subscriptionList.isEmpty()) {
+            log.info("Нет подписок для обновления времени отправки.");
+            return List.of();
+        }
+        subscriptionList.forEach(subscription -> {subscription.setLastSend(LocalDateTime.now());});
+        subscriptionRepository.saveAll(subscriptionList);
+        log.info("Обновлено {} подписок, время отправки установлено на {}", subscriptionList.size(), LocalDateTime.now());
+        return subscriptionList;
+    }
 }

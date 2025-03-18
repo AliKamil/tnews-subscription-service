@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum TimeInterval {
+    // при внесении изменений придется менять SubscriptionRepository, так как там используется ORDINAL
     ONE_HOUR("ONE_HOUR"),
     ONE_DAY("ONE_DAY"),
     ONE_WEEK("ONE_WEEK"),
