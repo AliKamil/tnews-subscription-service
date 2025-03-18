@@ -11,13 +11,10 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import tnews.subscription.bot.Command;
 import tnews.subscription.controllers.BotController;
 import tnews.subscription.entity.Subscription;
-import tnews.subscription.entity.UserAction;
 import tnews.subscription.service.CategoryService;
 import tnews.subscription.service.SubscriptionService;
 import tnews.subscription.service.UserService;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Component
@@ -37,41 +34,16 @@ public class CategoryUpdateScheduler {
         log.info("Updated categories: " + categories.size());
     }
 
-    @Scheduled(fixedRate = 600000) // проверка рассылок новостей раз в минуту для теста оптимально мин время рассылки
+    @Scheduled(fixedRate = 600000) // проверка рассылок новостей раз в 10 минут
+    // нужно резать LocalDateTime, так как из-за милисекунд будут пропуски
     public void sendNewsDigest() {
         log.info("Sending news digest");
-        List<Subscription> subscriptionList = subscriptionService.findAll();
+        List<Subscription> subscriptionList = subscriptionService.findNewsToValidSubscriptions();
 
         for (Subscription subscription : subscriptionList) {
-            if (shouldSend(subscription)) {
                 Update update = createFakeCallbackUpdate(subscription.getId());
                 botController.onUpdateReceived(update);
-            }
         }
-
-    }
-
-    private boolean shouldSend(Subscription subscription) {
-        if (userService.findById(subscription.getId()).getCurrentAction().equals(UserAction.UPDATE)) // не очень читабельно, но используется только тут. Стоит ли переписать?
-            return false;
-        LocalDateTime lastSent = subscription.getLastSend() != null
-                ? subscription.getLastSend().truncatedTo(ChronoUnit.MINUTES)
-                : null; // скорее всего округление не обязательно, так как отправка раз в час. Но тесты с ним удут более четко
-        LocalDateTime now = LocalDateTime.now();
-        log.info("Checking if last sent is: {}", lastSent);
-
-        boolean tmp = switch (subscription.getTimeInterval()) {
-            case ONE_HOUR -> lastSent == null || lastSent.plusHours(1).isBefore(now); //TODO: пока раз минуту, должно быть раз в час
-            case ONE_DAY ->  lastSent == null || lastSent.plusDays(1).isBefore(now);
-            case ONE_WEEK -> lastSent == null || lastSent.plusWeeks(1).isBefore(now);
-            case ONE_MONTH -> lastSent == null || lastSent.plusMonths(1).isBefore(now);
-        };
-        subscription.setLastSend(now);
-        subscriptionService.save(subscription);
-        if (lastSent != null)
-            log.info(lastSent.toString());
-        else log.info("Last sent is null");
-        return tmp;
     }
 
     /**

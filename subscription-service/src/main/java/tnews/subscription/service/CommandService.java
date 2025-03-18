@@ -360,15 +360,10 @@ public class CommandService {
         }
         Set<String> sendNews = new HashSet<>();
 
-        List<NewsDto> newNews = subscriptionService.getActualNews(chatId, 3); // userService.findActualNews(chatId);
+        List<NewsDto> newNews = subscriptionService.getActualNews(chatId, 3);
         if (newNews.isEmpty()) {
             return List.of();
         }
-        sendNews.addAll(newNews.stream()
-                .map(NewsDto::getId)
-                .toList());
-        subscription.setSentNewsIds(sendNews);
-        subscriptionService.save(subscription);
 
         return Stream.concat(
                 Stream.concat(
@@ -388,7 +383,7 @@ public class CommandService {
                             KeyboardFactory.createSubscription())
             );
         }
-        List<NewsDto> newNews = subscriptionService.getActualNews(chatId, 3); // userService.findActualNews(chatId);
+        List<NewsDto> newNews = subscriptionService.getActualNews(chatId, 3);
         if (newNews.isEmpty()) {
             return MessageFactory.createMessage(chatId,
                     "Свежих новостей пока нет :( Как появятся что-то новое - уведомим вас", messageId);
