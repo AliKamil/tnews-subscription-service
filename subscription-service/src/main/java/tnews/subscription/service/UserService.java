@@ -2,13 +2,9 @@ package tnews.subscription.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import tnews.aggregator.client.dto.NewsDto;
 import tnews.subscription.repository.UserRepository;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import tnews.subscription.entity.Category;
 import tnews.subscription.entity.KeyWord;
@@ -78,28 +74,5 @@ public class UserService {
         user.setCurrentAction(UserAction.valueOf(action));
         return userRepository.save(user);
     }
-
-//    public List<NewsDto> findActualNews(Long id) {
-//        updateCurrentAction(id, UserAction.READY.name());
-//        Subscription subscription = subscriptionService.findById(id);
-//        Set<String> categories = subscription.getCategories().stream()
-//                .map(Category::getCategoryName)
-//                .collect(Collectors.toSet());
-//        List<List<NewsDto>> allNews = subscriptionService.getNewsByCategories(categories);
-//        Set<String> sendNews = subscription.getSentNewsIds();
-//
-//
-//        List<NewsDto> newNews = allNews.stream()
-//                .flatMap(Collection::stream)
-//                .filter(news -> !sendNews.contains(news.getId()))
-//                .limit(3)
-//                .toList();
-//        sendNews.addAll(newNews.stream()
-//                .map(NewsDto::getId)
-//                .toList());
-//        subscription.setSentNewsIds(sendNews);
-//        subscriptionService.save(subscription);
-//        return newNews;
-//    }
 
 }
