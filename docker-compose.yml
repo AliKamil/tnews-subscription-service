@@ -8,6 +8,8 @@
       POSTGRES_PASSWORD: postgres_tnews_DB
     networks:
       - internal_net
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   mongo:
     image: mongo:latest
@@ -19,6 +21,7 @@
       MONGO_INITDB_DATABASE: newsdb
     volumes:
       - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - mongo_data:/data/db
     networks:
       - internal_net
 
@@ -56,3 +59,9 @@ networks:
     internal: true
   default:
     driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  mongo_data:
+    driver: local
