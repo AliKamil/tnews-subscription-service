@@ -1,4 +1,4 @@
-services:
+../services:
   postgres-db:
     image: postgres:latest
     container_name: tnews-db
