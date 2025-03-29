@@ -1,10 +1,11 @@
 server:
   port: 8081
+
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5555/tnews_DB
-    username: tnews_DB
-    password: postgres_tnews_DB
+    url: ${SPRING_DATASOURCE_LOCAL_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   feign:
     client:
@@ -13,19 +14,16 @@ spring:
           connectTimeout: 5000
           readTimeout: 5000
 
-
   jpa:
     show-sql: true
-
     hibernate:
       ddl-auto: update
-
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 bot:
-  name: tnewsSubscriptionBot
-  token: 8128984956:AAHhuxvs5fGkLYnXT3dhbN7uHsiIF9LiHS0
+  name: ${BOT_NAME:-tnewsSubscriptionBot}
+  token: ${BOT_TOKEN}
 
 aggregator:
   service:
-    url: http://localhost:8080/news
+    url: ${AGGREGATOR_SERVICE_LOCAL_URL}
