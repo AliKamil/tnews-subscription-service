@@ -39,6 +39,7 @@ services:
     networks:
       - internal_net
       - default
+    volumes:
 
   aggregation-service:
     build: ./aggregation-service

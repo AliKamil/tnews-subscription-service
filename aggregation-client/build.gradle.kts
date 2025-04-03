@@ -1,6 +1,7 @@
 plugins {
     `java-library`
     id("io.freefair.lombok") version "8.12.1"
+    id("io.github.klahap.dotenv") version "1.1.3"
 }
 
 group = "tnews:aggregation-client"
