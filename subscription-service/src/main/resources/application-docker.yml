@@ -20,9 +20,9 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 bot:
-  name: tnewsSubscriptionBot
-  token: 8128984956:AAHhuxvs5fGkLYnXT3dhbN7uHsiIF9LiHS0
+  name: ${BOT_NAME:-tnewsSubscriptionBot}
+  token: ${BOT_TOKEN}
 
 aggregator:
   service:
-    url: ${AGGREGATOR_SERVICE_URL}
+    url: ${AGGREGATOR_SERVICE_URL:-http://aggregation-service:8080/news}

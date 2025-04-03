@@ -1,9 +1,9 @@
 spring:
   data:
     mongodb:
-      username: user
-      password: password
-      host: localhost
-      port: 27017
-      database: newsdb
+      username: ${MONGO_USERNAME}
+      password: ${MONGO_PASSWORD}
+      host: ${MONGO_HOST:-localhost}
+      port: ${MONGO_PORT:-27017}
+      database: ${MONGO_DATABASE}
 
