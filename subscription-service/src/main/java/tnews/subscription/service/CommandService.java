@@ -95,7 +95,8 @@ public class CommandService {
                     List<Category> categories = categoryService.findAll();
                     return choosingCategories(chatId, messageId, categories);
                 }
-                case KEYWORD -> {
+                case KEYWORD,
+                     ADD_KEYWORD -> {
                     return addKeyWord(chatId, messageId);
                 }
                 case UPDATE_KEYWORD -> {
