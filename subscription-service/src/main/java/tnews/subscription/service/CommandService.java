@@ -68,8 +68,11 @@ public class CommandService {
             }
         }
 
-        if(UserAction.WAITING_FOR_KEYWORD.equals(user.getCurrentAction())) {
+        if (UserAction.WAITING_FOR_KEYWORD.equals(user.getCurrentAction())) {
             return createKeyword(chatId, text);
+        }
+        if (UserAction.UPDATE_KEYWORDS.equals(user.getCurrentAction())) {
+            return createKeywordForUpdate(chatId, text, message.getMessageId());
         }
         return List.of(MessageFactory.createMessage(chatId, "Неизвестная команда",
                         KeyboardFactory.keyboardMarkup(user.getSubscription())));
@@ -98,11 +101,20 @@ public class CommandService {
                 case KEYWORD -> {
                     return addKeyWord(chatId, messageId);
                 }
+                case ADD_KEYWORD -> {
+                    return addKeyWordForUpdate(chatId, messageId);
+                }
                 case UPDATE_KEYWORD -> {
                     return updateKeyWord(chatId, messageId);
                 }
                 case DELETE_KEYWORD -> {
                     return deleteKeyWord(chatId, messageId);
+                }
+                case DELETE_KEYWORD_ACTION -> {
+                    String keyword = Arrays.stream(callbackData.split(" "))
+                            .skip(1)
+                            .collect(Collectors.joining(" "));
+                    return deleteKeywordAction(chatId, keyword, messageId);
                 }
                 case UPDATE_CATEGORY -> {
                     return updateCategory(chatId, messageId);
@@ -246,8 +258,23 @@ public class CommandService {
                 KeyboardFactory.settingMenu()));
     }
 
+    private List<BotApiMethod<?>> createKeywordForUpdate (Long chatId, String keyword, Integer messageId) {
+        User user = userService.addKeyword(chatId, keyword);
+        if (user == null) {
+            return MessageFactory.createMessage(chatId, "Пользователь не найден :(", messageId);
+        }
+        userService.updateCurrentAction(chatId, UserAction.READY.name());
+        return List.of(MessageFactory.createMessage(chatId, "Ключевое слово: " + keyword + " добавлено!",
+                KeyboardFactory.subUpdateMenu()));
+    }
+
     private List<BotApiMethod<?>> addKeyWord (Long chatId, Integer messageId) {
         userService.updateCurrentAction(chatId, UserAction.WAITING_FOR_KEYWORD.name());
+        return MessageFactory.createMessage(chatId, "Введите одно ключевое слово: ", messageId);
+    }
+
+    private List<BotApiMethod<?>> addKeyWordForUpdate (Long chatId, Integer messageId) {
+        userService.updateCurrentAction(chatId, UserAction.UPDATE_KEYWORDS.name());
         return MessageFactory.createMessage(chatId, "Введите одно ключевое слово: ", messageId);
     }
 
@@ -277,6 +304,16 @@ public class CommandService {
                 KeyboardFactory.deleteButtonKeyWord(keyWords), messageId);
     }
 
+    private List<BotApiMethod<?>> deleteKeywordAction (Long chatId, String keyword, Integer messageId) {
+        Subscription subscription = subscriptionService.findById(chatId);
+        Set<KeyWord> keywords = subscription.getKeyWords();
+        keywords.remove(keyWordsService.findKeyWordByValue(keyword));
+        subscription.setKeyWords(keywords);
+        subscriptionService.save(subscription);
+        return MessageFactory.createMessage(chatId, "Категория удалена "  + keyword,
+                KeyboardFactory.deleteButtonKeyWord(keywords), messageId);
+    }
+
     private List<BotApiMethod<?>> choosingCategories (Long chatId, Integer messageId, List<Category> categories) {
         return MessageFactory.createMessage(chatId, "Выберите нужную категорию: ",
                 KeyboardFactory.categoriesButtons(categories), messageId);
@@ -287,12 +324,20 @@ public class CommandService {
         if (updateUser == null) {
             return MessageFactory.createMessage(chatId, "Пользователь не найден :(", messageId);
         }
+        if (updateUser.getCurrentAction().equals(UserAction.UPDATE)) {
+            return MessageFactory.createMessage(chatId, "Категория добавлена",
+                    KeyboardFactory.subUpdateMenu(), messageId);
+        }
         return MessageFactory.createMessage(chatId, "Категория добавлена",
                 KeyboardFactory.settingMenu(), messageId);
     }
     private List<BotApiMethod<?>> updateCategory (Long chatId, Integer messageId) {
         Subscription subscription = subscriptionService.findById(chatId);
         Set<Category> categories = subscription.getCategories();
+        if(categories.isEmpty()) {
+            return MessageFactory.createMessage(chatId, "У вас нет категорий, желаете добавить?",
+                            KeyboardFactory.updateCategoryWithoutDelete(), messageId);
+        }
         return List.of(
                 MessageFactory.createMessage(chatId, "Ваши категории: "),
                 MessageFactory.createMessage(chatId, categories.stream()
@@ -358,13 +403,10 @@ public class CommandService {
                     MessageFactory.createMessage(chatId, "Установите частоту обновления новостей",
                             KeyboardFactory.setTimeInterval()));
         }
-        Set<String> sendNews = new HashSet<>();
-
         List<NewsDto> newNews = subscriptionService.getActualNews(chatId, 3);
         if (newNews.isEmpty()) {
             return List.of();
         }
-
         return Stream.concat(
                 Stream.concat(
                     Stream.of(MessageFactory.createMessage(chatId, "Свежие новости")),

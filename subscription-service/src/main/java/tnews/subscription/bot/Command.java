@@ -23,6 +23,7 @@ public enum Command {
     DELETE_CATEGORY("/deleteCategory"),
     DELETE_CATEGORY_ACTION("/deleteCategoryAction"),
     DELETE_KEYWORD("/deleteKeyword"),
+    DELETE_KEYWORD_ACTION("/deleteKeywordAction"),
     DELETE_TIME_INTERVAL("/deleteTimeInterval"),
     CANCELLATION("/cancellation"),
     EXIT("/exit");
