@@ -48,6 +48,15 @@ public class KeyboardFactory {
         return createInlineKeyboard(buttons, 1);
     }
 
+    public static InlineKeyboardMarkup subUpdateMenu() {
+        Map<String, String> buttons = new LinkedHashMap<>();
+        buttons.put("обновить категории", Command.UPDATE_CATEGORY.getCom());
+        buttons.put("обновить ключевые слова", Command.UPDATE_KEYWORD.getCom());
+        buttons.put("обновить частоту обновления", Command.UPDATE_TIME_INTERVAL.getCom());
+        buttons.put("закончить настройку", Command.EXIT.getCom());
+        return createInlineKeyboard(buttons, 1);
+    }
+
     public static InlineKeyboardMarkup deleteButtonsCategory(Set<Category> categories) {
         Map<String, String> buttons = new LinkedHashMap<>();
         for (Category category : categories) {
@@ -75,6 +84,13 @@ public class KeyboardFactory {
         return createInlineKeyboard(buttons, 2);
     }
 
+    public static InlineKeyboardMarkup updateCategoryWithoutDelete() {
+        Map<String, String> buttons = new LinkedHashMap<>();
+        buttons.put("ДОБАВИТЬ", Command.ADD_CATEGORY.getCom());
+        buttons.put("ОТМЕНА", Command.UPDATE.getCom());
+        return createInlineKeyboard(buttons, 2);
+    }
+
     public static InlineKeyboardMarkup updateKeyWord() {
         Map<String, String> buttons = new LinkedHashMap<>();
         buttons.put("ДОБАВИТЬ", Command.ADD_KEYWORD.getCom());
@@ -86,9 +102,9 @@ public class KeyboardFactory {
     public static InlineKeyboardMarkup deleteButtonKeyWord(Set<KeyWord> keyWords) {
         Map<String, String> buttons = new LinkedHashMap<>(); //TODO: либо писать логику для обработки двух ключевых слов, либо изменять UserAction и передавать одно ключевое слово
         for (KeyWord keyWord : keyWords) {
-            buttons.put(keyWord.getKeyword(), Command.DELETE_KEYWORD.getCom() + " " + keyWord.getKeyword());
+            buttons.put(keyWord.getKeyword(), Command.DELETE_KEYWORD_ACTION.getCom() + " " + keyWord.getKeyword());
         }
-        buttons.put("ОТМЕНА", Command.DELETE_KEYWORD.getCom() + " " + Command.CANCELLATION.getCom());
+        buttons.put("ОТМЕНА", Command.UPDATE.getCom());
         return createInlineKeyboard(buttons, 3);
     }
 
